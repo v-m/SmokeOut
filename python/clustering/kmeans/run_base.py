@@ -143,6 +143,9 @@ def sklearnProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, 
     outputFile = datasetOutFile(datasetName, selectedAlgo, runinfo=runinfo)
     clustersOutputFile = datasetOutFile(datasetName, centroidFor(selectedAlgo), runinfo=runinfo)
 
+    print("File in {}".format(outputFile))
+    print("Clusters in {}".format(clustersOutputFile))
+
     if os.path.exists(outputFile) and os.path.exists(clustersOutputFile):
         print("sklearn skipped")
         return

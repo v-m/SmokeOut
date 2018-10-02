@@ -3,8 +3,8 @@
 import argparse
 import sys
 import pandas
+# import dask.dataframe as dd
 from tools.static import *
-from config import DATASET_ROOT
 
 class ClusterPipeline:
     def __init__(self, RUN_INFO_BASE, AVAIL_ALGOS, pkg):
@@ -55,17 +55,15 @@ class ClusterPipeline:
 
     def runPipe(self):
         parser = argparse.ArgumentParser(description='Generate clusters for dataset')
-        parser.add_argument('--toolkits', '-T', action='append', help='Consider these toolkits', default=None)
-        parser.add_argument('--base', '-B', type=int, action='append', help='Execute only RUN x', default=0)
-        parser.add_argument('--runs', '-R', type=int, help='Number of runs to perform', default=NB_RUNS)
-        parser.add_argument('--dataset', '-D', action='append', help='Execute only dataset X', default=None)
-        parser.add_argument('--dataset-root', '-F', action='append', help='Dataset root folder', default=DATASET_ROOT)
+        parser.add_argument('--toolkits', '-t', action='append', help='Consider these toolkits', default=None)
+        parser.add_argument('--base', '-b', type=int, action='append', help='Execute only RUN x', default=0)
+        parser.add_argument('--runs', '-r', type=int, help='Number of runs to perform', default=NB_RUNS)
+        parser.add_argument('--dataset', '-d', action='append', help='Run this dataset tsv file', default=None)
         args = parser.parse_args()
 
-        CONSIDERED_ALGOS = self.AVAIL_ALGOS if args.algos is None else args.algos
+        CONSIDERED_ALGOS = self.AVAIL_ALGOS if args.toolkits is None else args.toolkits
         print("Algos = {}".format(CONSIDERED_ALGOS))
         print("Runs = {}".format(args.runs))
-        print("Dataset root folder = {}".format(args.dataset_root))
         print("Dataset = {}".format(args.dataset))
         print("Base = {}".format(args.base))
 
@@ -75,42 +73,35 @@ class ClusterPipeline:
             print("RUN: {}".format(RUN_INFO))
             print("*****")
 
-            for datasetName in exploreDatasets():
-                if args.dataset is not None and datasetName not in args.dataset:
-                    continue
-
-                print(datasetName)
-
-                if datasetName in SKIP_DATASET:
-                    print("Skipped !")
-                    continue
-
-                # if len(sys.argv) > 1:
-                #     CONSIDERED_ALGOS = sys.argv[1].split(":")
+            for dataset in args.dataset:
                 print("Considering: {}".format(CONSIDERED_ALGOS))
 
-                srcFile = datasetSrcFile(datasetName)
+                srcFile = dataset
 
-                if not os.path.exists(srcFile):
-                    continue
+                print("Reading file {}...".format(srcFile))
+                # data = pandas.read_csv(srcFile, sep='\t')
+                # data = dd.read_csv(srcFile, sep='\t')
 
-                data = pandas.read_csv(srcFile, sep='\t')
+                chunksize = 100000
+                text_file_reader = pandas.read_csv(srcFile, sep='\t', chunksize=chunksize, iterator=True)
+                data = pandas.concat(text_file_reader, ignore_index=True)
 
                 ''' VINCE 
                 We know that the dataframe contains a target column with the expected class.
                 Let's see what values are contained withit this column
                 '''
+                print("Analyzing file...".format(srcFile))
                 groundTruthClustersId = data.target.unique()
                 clustersNumber = len(groundTruthClustersId)
 
                 dataLessTarget = data.loc[:, data.columns != 'target']
 
-                self.preprocessRun(groundTruthClustersId, data, dataLessTarget, datasetName, RUN_INFO)
+                self.preprocessRun(groundTruthClustersId, data, dataLessTarget, srcFile, RUN_INFO)
 
                 for ALGO in CONSIDERED_ALGOS:
                     print("RUN {}. ALGO = {}".format(runid, ALGO))
                     try:
-                        self.processRun(ALGO, srcFile, clustersNumber, dataLessTarget, datasetName, RUN_INFO)
+                        self.processRun(ALGO, srcFile, clustersNumber, dataLessTarget, srcFile, RUN_INFO)
                     except:
                         print("!!!!! Exception for {} !!!!!".format(ALGO))
                         print(sys.exc_info())

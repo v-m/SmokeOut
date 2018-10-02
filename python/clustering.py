@@ -16,7 +16,7 @@ def help():
     ])))
 
 
-if len(sys.argv) == 0:
+if len(sys.argv) < 2:
     help()
 else:
     print(sys.argv)

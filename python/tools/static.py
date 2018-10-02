@@ -56,11 +56,16 @@ def exploreDatasets(root = DATASET_ROOT):
         if os.path.isdir(os.path.join(root, datasetName)):
             yield datasetName
 
+@DeprecationWarning
 def datasetSrcFile(datasetName):
     return "{}/{}/{}.tsv.gz".format(DATASET_ROOT, datasetName, datasetName)
 
-def datasetOutFile(datasetName, algoName, ext = "csv", runinfo = None, datasetroot = DATASET_ROOT):
+
+def datasetOutFileLegacy(datasetName, algoName, ext = "csv", runinfo = None, datasetroot = DATASET_ROOT):
     return "{}/{}/{}.{}{}.{}".format(datasetroot, datasetName, datasetName, algoName, ".{}".format(runinfo) if runinfo is not None else "", ext)
+
+def datasetOutFile(datasetName, algoName, ext = "csv", runinfo = None, datasetroot = DATASET_ROOT):
+    return "{}.{}{}.{}".format(datasetName, algoName, ".{}".format(runinfo) if runinfo is not None else "", ext)
 
 
 def centroidFor(algoName):
