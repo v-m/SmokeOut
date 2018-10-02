@@ -4,25 +4,17 @@ from tools.static import *
 
 
 def help():
-    print("Please select an algorithm: {}".format(",".join([
-        # AFFINITY_PROP_ALGO,
-        # DBSCAN_ALGO,
-        GAUSSIANMIX_ALGO,
-        HIERARCHICAL_ALGO,
-        KMEANS_ALGO,
-        # MEANSHIFT_ALGO,
-        # SPECTRAL_ALGO
-        KMEANS_PLUSPLUS_ALGO
-    ])))
+    print("Please select an algorithm:")
+    print('\t%20s : %s'%(KMEANS_ALGO, "K-means (initial starting point)"))
+    print('\t%20s : %s'%(KMEANS_PLUSPLUS_ALGO, "K-means++ (initial starting point)"))
+    print('\t%20s : %s'%(HIERARCHICAL_ALGO, "Hierarchical Clustering"))
+    print('\t%20s : %s'%(GAUSSIANMIX_ALGO, "Gaussian Mixtures"))
 
 
 if len(sys.argv) < 2:
     help()
 else:
-    print(sys.argv)
     theArg = sys.argv.pop(1)
-
-    print(sys.argv)
 
     if theArg == GAUSSIANMIX_ALGO:
         import clustering.clustering_gaussianmix

@@ -1,0 +1,10 @@
+__pycache__
+.DS_Store
+*.tsv
+*.tsv.gz
+*.csv
+*.xlsx
+*.xls
+*.json
+*.xml
+data/

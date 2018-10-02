@@ -59,52 +59,81 @@ class ClusterPipeline:
         parser.add_argument('--base', '-b', type=int, action='append', help='Execute only RUN x', default=0)
         parser.add_argument('--runs', '-r', type=int, help='Number of runs to perform', default=NB_RUNS)
         parser.add_argument('--dataset', '-d', action='append', help='Run this dataset tsv file', default=None)
+        parser.add_argument('--reuse', '-s', action='store_true', help='If several dataset, perform all runs before going to the next dataset (no dataset interlacement).')
         args = parser.parse_args()
 
         CONSIDERED_ALGOS = self.AVAIL_ALGOS if args.toolkits is None else args.toolkits
+
+        reuse = args.reuse
+        if args.dataset is None:
+            print("ERROR: At least one dataset should be specified using -d")
+            sys.exit(1)
+        if len(args.dataset) == 1:
+            reuse = True
+
+
         print("Algos = {}".format(CONSIDERED_ALGOS))
         print("Runs = {}".format(args.runs))
         print("Dataset = {}".format(args.dataset))
         print("Base = {}".format(args.base))
+        print("Reuse = {}".format(reuse))
+        
 
-        for runid in range(args.runs):
-            RUN_INFO = runForNr(self.RUN_INFO_BASE, args.base + runid)
-            print("*****")
-            print("RUN: {}".format(RUN_INFO))
-            print("*****")
+        fulldatasets = []
 
-            for dataset in args.dataset:
-                print("Considering: {}".format(CONSIDERED_ALGOS))
+        if reuse:
+            fulldatasets = list(map(lambda x: [x], args.dataset))
+        else:
+            fulldatasets = [args.dataset]
 
-                srcFile = dataset
 
-                print("Reading file {}...".format(srcFile))
-                # data = pandas.read_csv(srcFile, sep='\t')
-                # data = dd.read_csv(srcFile, sep='\t')
+        for datasets in fulldatasets:
 
-                chunksize = 100000
-                text_file_reader = pandas.read_csv(srcFile, sep='\t', chunksize=chunksize, iterator=True)
-                data = pandas.concat(text_file_reader, ignore_index=True)
+            data = None
+            groundTruthClustersId = None
+            clustersNumber = None
+            dataLessTarget = None
+            
+            for runid in range(args.runs):
+                RUN_INFO = runForNr(self.RUN_INFO_BASE, args.base + runid)
+                print("*****")
+                print("RUN: {}".format(RUN_INFO))
+                print("*****")
+                for dataset in datasets:
+                    print("Considering: {}".format(CONSIDERED_ALGOS))
 
-                ''' VINCE 
-                We know that the dataframe contains a target column with the expected class.
-                Let's see what values are contained withit this column
-                '''
-                print("Analyzing file...".format(srcFile))
-                groundTruthClustersId = data.target.unique()
-                clustersNumber = len(groundTruthClustersId)
+                    srcFile = dataset
 
-                dataLessTarget = data.loc[:, data.columns != 'target']
+                    if data is None or not reuse:
+                        print("Reading file {}...".format(srcFile))
+                        # data = pandas.read_csv(srcFile, sep='\t')
+                        # data = dd.read_csv(srcFile, sep='\t')
 
-                self.preprocessRun(groundTruthClustersId, data, dataLessTarget, srcFile, RUN_INFO)
+                        chunksize = 100000
+                        text_file_reader = pandas.read_csv(srcFile, sep='\t', chunksize=chunksize, iterator=True)
+                        data = pandas.concat(text_file_reader, ignore_index=True)
 
-                for ALGO in CONSIDERED_ALGOS:
-                    print("RUN {}. ALGO = {}".format(runid, ALGO))
-                    try:
-                        self.processRun(ALGO, srcFile, clustersNumber, dataLessTarget, srcFile, RUN_INFO)
-                    except:
-                        print("!!!!! Exception for {} !!!!!".format(ALGO))
-                        print(sys.exc_info())
+                        ''' VINCE 
+                        We know that the dataframe contains a target column with the expected class.
+                        Let's see what values are contained withit this column
+                        '''
+                        print("Analyzing file...".format(srcFile))
+                        groundTruthClustersId = data.target.unique()
+                        clustersNumber = len(groundTruthClustersId)
+
+                        dataLessTarget = data.loc[:, data.columns != 'target']
+                    else:
+                        print("Reusing previously loaded information...")
+
+                    self.preprocessRun(groundTruthClustersId, data, dataLessTarget, srcFile, RUN_INFO)
+
+                    for ALGO in CONSIDERED_ALGOS:
+                        print("RUN {}. ALGO = {}".format(runid, ALGO))
+                        try:
+                            self.processRun(ALGO, srcFile, clustersNumber, dataLessTarget, srcFile, RUN_INFO)
+                        except:
+                            print("!!!!! Exception for {} !!!!!".format(ALGO))
+                            print(sys.exc_info())
 
     def otherProcessRun(self, ALGO, srcFile, clustersNumber, dataLessTarget, datasetName, RUN_INFO):
         pass

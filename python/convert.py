@@ -1,0 +1,60 @@
+'''
+Convert a sparse notation file:
+<target> ftid:value ...
+Into a dense one:
+<target>    0_if_zero   <value_if_not_zero> ...
+Author: Vincenzo Musco (http://www.vmusco.com)
+'''
+
+import sys
+import argparse
+
+parser = argparse.ArgumentParser(description='Produce a dense file.')
+parser.add_argument('file', type=str, help='Sparse input file (first field is target)')
+args = parser.parse_args()
+
+max_features = 0
+features_collection = []
+
+with open(args.file, 'r') as fp:
+    content = fp.read()
+
+    lines = content.split("\n")
+    progress, total = 1, len(lines)
+
+    for line in lines:
+        parts = line.strip().split(" ")
+        target = parts.pop(0)
+        if len(parts) == 0:
+            continue
+        
+        features = {}
+        for part in parts:
+            featureid, value = list(map(lambda x: int(x), part.split(":")))
+            features[featureid] = value
+            if featureid > max_features:
+                max_features = featureid
+
+        features_encoded = sorted(set(features.keys()))
+
+        assert(len(features_encoded) == len(features))   
+        features_collection.append(features)
+
+    print("{} features".format(max_features), file=sys.stderr)
+
+print("target", end='')
+for i in range(max_features):
+    print('\t', end='')
+    print("f{}".format(i), end='')
+print("")
+
+for features in features_collection:
+    print("{}/{}".format(progress, total), file=sys.stderr)
+    print(target, end='')
+    features_encoded = sorted(set(features.keys()))
+    for i in range(max_features):
+        print('\t', end='')
+        print(features[i] if i in features_encoded else 0, end='')
+    print("")
+    progress += 1
+    

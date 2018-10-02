@@ -1,1 +1,0 @@
-PYTHON_BIN = "/venv/bin/python3"
