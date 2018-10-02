@@ -4,6 +4,7 @@ import argparse
 import sys
 import pandas
 from tools.static import *
+from config import DATASET_ROOT
 
 class ClusterPipeline:
     def __init__(self, RUN_INFO_BASE, AVAIL_ALGOS, pkg):
@@ -54,22 +55,21 @@ class ClusterPipeline:
 
     def runPipe(self):
         parser = argparse.ArgumentParser(description='Generate clusters for dataset')
-        parser.add_argument('--algos', '-A', action='append', help='Consider these algorithms', default=None)
+        parser.add_argument('--toolkits', '-T', action='append', help='Consider these toolkits', default=None)
         parser.add_argument('--base', '-B', type=int, action='append', help='Execute only RUN x', default=0)
         parser.add_argument('--runs', '-R', type=int, help='Number of runs to perform', default=NB_RUNS)
         parser.add_argument('--dataset', '-D', action='append', help='Execute only dataset X', default=None)
+        parser.add_argument('--dataset-root', '-F', action='append', help='Dataset root folder', default=DATASET_ROOT)
         args = parser.parse_args()
 
         CONSIDERED_ALGOS = self.AVAIL_ALGOS if args.algos is None else args.algos
         print("Algos = {}".format(CONSIDERED_ALGOS))
         print("Runs = {}".format(args.runs))
+        print("Dataset root folder = {}".format(args.dataset_root))
         print("Dataset = {}".format(args.dataset))
         print("Base = {}".format(args.base))
 
-        # BASE = int(sys.argv[2]) if len(sys.argv) > 2 else 0
-        # DATASETFILTER = sys.argv[3] if len(sys.argv) > 3 else None
         for runid in range(args.runs):
-
             RUN_INFO = runForNr(self.RUN_INFO_BASE, args.base + runid)
             print("*****")
             print("RUN: {}".format(RUN_INFO))

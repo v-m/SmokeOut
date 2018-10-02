@@ -51,14 +51,9 @@ SCORING_METRICS = [sklearn.metrics.adjusted_rand_score,
 
                    sklearn.metrics.fowlkes_mallows_score]
 
-# def exploreDatasets():
-#     for datasetName in os.listdir(DATASET_ROOT):
-#         if os.path.isdir(os.path.join(DATASET_ROOT, datasetName)):
-#             yield data
-
-def exploreDatasets():
-    for datasetName in os.listdir(DATASET_ROOT):
-        if os.path.isdir(os.path.join(DATASET_ROOT, datasetName)):
+def exploreDatasets(root = DATASET_ROOT):
+    for datasetName in os.listdir(root):
+        if os.path.isdir(os.path.join(root, datasetName)):
             yield datasetName
 
 def datasetSrcFile(datasetName):
