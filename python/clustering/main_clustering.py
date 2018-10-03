@@ -58,6 +58,7 @@ class ClusterPipeline:
         parser.add_argument('--toolkits', '-t', action='append', help='Consider these toolkits', default=None)
         parser.add_argument('--base', '-b', type=int, action='append', help='Execute only RUN x', default=0)
         parser.add_argument('--runs', '-r', type=int, help='Number of runs to perform', default=NB_RUNS)
+        parser.add_argument('--basepath-dataset', '-a', type=str, help='Specify the absolute part of the path for dataset selection', default=None)
         parser.add_argument('--dataset', '-d', action='append', help='Run this dataset tsv file', default=None)
         parser.add_argument('--reuse', '-s', action='store_true', help='If several dataset, perform all runs before going to the next dataset (no dataset interlacement).')
         args = parser.parse_args()
@@ -79,16 +80,17 @@ class ClusterPipeline:
         print("Reuse = {}".format(reuse))
         
 
-        fulldatasets = []
+        fulldatasets = args.dataset
+
+        if args.basepath_dataset:
+            fulldatasets = list(map(lambda x: "{}/{}".format(args.basepath_dataset, x), fulldatasets))
 
         if reuse:
-            fulldatasets = list(map(lambda x: [x], args.dataset))
+            fulldatasets = list(map(lambda x: [x], fulldatasets))
         else:
-            fulldatasets = [args.dataset]
-
+            fulldatasets = [fulldatasets]
 
         for datasets in fulldatasets:
-
             data = None
             groundTruthClustersId = None
             clustersNumber = None
@@ -117,7 +119,7 @@ class ClusterPipeline:
                         We know that the dataframe contains a target column with the expected class.
                         Let's see what values are contained withit this column
                         '''
-                        print("Analyzing file...".format(srcFile))
+                        print("Analyzing file...")
                         groundTruthClustersId = data.target.unique()
                         clustersNumber = len(groundTruthClustersId)
                         print("#clusters = {}".format(clustersNumber))
