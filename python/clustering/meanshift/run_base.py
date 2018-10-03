@@ -3,12 +3,14 @@ import os
 import subprocess
 import time
 import sklearn.cluster
-from tools.static import *
 
 from clustering.tools import dumpDataOnCleanCsv
 
 
 #ALGONAME = "meanshift_"
+from config import TEMPFOLDER, MLPACK_BIN
+from tools.static import datasetOutFile, centroidFor
+
 ALGONAME = ""
 MLPACK_ALGO = "{}mlpack".format(ALGONAME)
 SKLEARN_ALGO = "{}sklearn".format(ALGONAME)

@@ -1,10 +1,7 @@
 #
 # Author: Vincenzo Musco (http://www.vmusco.com)
-
 import os
-
 import sklearn.metrics
-from config import *
 
 # TOOLKITS CONSTANTS
 MATLAB_ALGO = "matlab"
@@ -51,20 +48,13 @@ SCORING_METRICS = [sklearn.metrics.adjusted_rand_score,
 
                    sklearn.metrics.fowlkes_mallows_score]
 
-def exploreDatasets(root = DATASET_ROOT):
+def exploreDatasets(root):
     for datasetName in os.listdir(root):
         if os.path.isdir(os.path.join(root, datasetName)):
             yield datasetName
 
-@DeprecationWarning
-def datasetSrcFile(datasetName):
-    return "{}/{}/{}.tsv.gz".format(DATASET_ROOT, datasetName, datasetName)
 
-
-def datasetOutFileLegacy(datasetName, algoName, ext = "csv", runinfo = None, datasetroot = DATASET_ROOT):
-    return "{}/{}/{}.{}{}.{}".format(datasetroot, datasetName, datasetName, algoName, ".{}".format(runinfo) if runinfo is not None else "", ext)
-
-def datasetOutFile(datasetName, algoName, ext = "csv", runinfo = None, datasetroot = DATASET_ROOT):
+def datasetOutFile(datasetName, algoName, ext = "csv", runinfo = None):
     return "{}.{}{}.{}".format(datasetName, algoName, ".{}".format(runinfo) if runinfo is not None else "", ext)
 
 
@@ -73,9 +63,6 @@ def centroidFor(algoName):
 
 def runForNr(runBase, runId):
     return "{}{}".format(runBase, runId)
-
-
-
 
 def matlabRedirectTempFolder(tempdir):
     return "tempdir='{}';".format(tempdir)

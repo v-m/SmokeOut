@@ -4,7 +4,7 @@ import argparse
 import sys
 import pandas
 # import dask.dataframe as dd
-from tools.static import *
+from tools.static import SHOGUN_ALGO, SKLEARN_ALGO, R_ALGO, TENSORFLOW_ALGO, MLPACK_ALGO, MATLAB_ALGO, WEKA_ALGO, OPENCV_ALGO, runForNr
 
 class ClusterPipeline:
     def __init__(self, RUN_INFO_BASE, AVAIL_ALGOS, pkg):
@@ -57,7 +57,7 @@ class ClusterPipeline:
         parser = argparse.ArgumentParser(description='Generate clusters for dataset')
         parser.add_argument('--toolkits', '-t', action='append', help='Consider these toolkits', default=None)
         parser.add_argument('--base', '-b', type=int, action='append', help='Execute only RUN x', default=0)
-        parser.add_argument('--runs', '-r', type=int, help='Number of runs to perform', default=NB_RUNS)
+        parser.add_argument('--runs', '-r', type=int, help='Number of runs to perform', default=30)
         parser.add_argument('--basepath-dataset', '-a', type=str, help='Specify the absolute part of the path for dataset selection', default=None)
         parser.add_argument('--dataset', '-d', action='append', help='Run this dataset tsv file', default=None)
         parser.add_argument('--reuse', '-s', action='store_true', help='If several dataset, perform all runs before going to the next dataset (no dataset interlacement).')

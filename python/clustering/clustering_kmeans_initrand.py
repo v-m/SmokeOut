@@ -1,12 +1,14 @@
 # Entry point for generating K-means (random starting points)
 # Author: Vincenzo Musco (http://www.vmusco.com)
-
+import os
 import numpy
 import clustering.kmeans.run_base as run
 from clustering.main_clustering import ClusterPipeline
 from tools.clustering_constants import INCLUDED_ALGO
-from tools.static import *
 import pandas
+
+from tools.static import KMEANS_ALGO, datasetOutFile, SHOGUN_ALGO, SKLEARN_ALGO, R_ALGO, TENSORFLOW_ALGO, MLPACK_ALGO, \
+    MATLAB_ALGO, SKLEARN_TOL0_ALGO, R_100ITER_ALGO
 
 RUN_INFO_BASE = KMEANS_ALGO
 AVAIL_ALGOS = INCLUDED_ALGO[RUN_INFO_BASE]

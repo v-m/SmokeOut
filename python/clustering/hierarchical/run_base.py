@@ -2,6 +2,7 @@
 # Author: Vincenzo Musco (http://www.vmusco.com)
 
 import csv
+import os
 import re
 import subprocess
 
@@ -9,8 +10,9 @@ import subprocess
 import sklearn.cluster
 
 from clustering.tools import dumpDataOnCleanCsv
-from tools.static import *
-
+from config import MATLAB_EXE, TEMPFOLDER, JAVA_EXE, R_BIN
+from tools.static import datasetOutFile, MATLAB_ALGO, matlabRedirectTempFolder, WEKA_ALGO, JAVA_CLASSPATH, SKLEARN_ALGO, \
+    R_ALGO
 
 
 def matlabProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None):

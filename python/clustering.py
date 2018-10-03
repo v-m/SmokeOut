@@ -1,6 +1,6 @@
 import sys
 
-from tools.static import *
+from tools.static import KMEANS_ALGO, KMEANS_PLUSPLUS_ALGO, HIERARCHICAL_ALGO, GAUSSIANMIX_ALGO
 
 
 def help():

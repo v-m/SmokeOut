@@ -13,7 +13,10 @@ import sklearn.mixture
 from tensorflow.python.framework import constant_op
 
 from clustering.tools import dumpDataOnCleanCsv
-from tools.static import *
+from config import MATLAB_EXE, TEMPFOLDER, JAVA_EXE
+from tools.static import datasetOutFile, MATLAB_ALGO, matlabRedirectTempFolder, WEKA_ALGO, JAVA_CLASSPATH, \
+    SKLEARN_TOL0_ALGO, SKLEARN_ALGO, TENSORFLOW_ALGO, centroidFor
+
 
 def matlabProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None):
     outputFile = datasetOutFile(datasetName, MATLAB_ALGO, runinfo=runinfo)

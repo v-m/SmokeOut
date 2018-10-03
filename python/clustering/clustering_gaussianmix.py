@@ -4,7 +4,7 @@
 import clustering.gaussianmixture.run_base as run
 from clustering.main_clustering import ClusterPipeline
 from tools.clustering_constants import INCLUDED_ALGO
-from tools.static import *
+from tools.static import GAUSSIANMIX_ALGO, SKLEARN_TOL0_ALGO
 
 RUN_INFO_BASE = GAUSSIANMIX_ALGO
 AVAIL_ALGOS = INCLUDED_ALGO[RUN_INFO_BASE]

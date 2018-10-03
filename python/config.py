@@ -15,16 +15,3 @@ JAVA_EXE = "/Library/Java/JavaVirtualMachines/jdk-9.0.4.jdk/Contents/Home/bin/ja
 SKIP_DATASET = ["connect-4", "poker", "mnist", "kddcup"]
 
 TEMPFOLDER = "/tmp"
-DATASET_ROOT = "/Users/vince/Temp/Datasets/learning_dataset/penn-ml-benchmarks/datasets/classification"
-# DATASET_ROOT = "/tmp/penn-ml-benchmarks/datasets/classification"
-# DATASET_ROOT = "/Users/vince/Temp/Datasets/temp-pennml/datasets/classification"
-
-# DATASET_ROOT_ALL = ["/Users/vince/Temp/Datasets/penn-ml-benchmarks/datasets/classification",
-#                     "/Users/vince/Temp/Datasets/penn-ml-benchmarks_old/datasets/classification"]
-
-DATASET_ROOT_ALL = ["/Users/vince/Temp/Datasets/learning_dataset/penn-ml-benchmarks/datasets/classification",
-                    "/Users/vince/Temp/Datasets/learning_dataset/penn-ml-benchmarks-xin/datasets/classification"]
-
-# DATASET_ROOT_ALL = [DATASET_ROOT]
-
-NB_RUNS = 10

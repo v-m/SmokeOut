@@ -1,16 +1,16 @@
 # Not used -- cf Xin for implementation
 # Author: Vincenzo Musco (http://www.vmusco.com)
-
 import csv
 import hashlib
 import os
 import subprocess
 import time
 
-# VINCE Loads scikit
 import sklearn.cluster
 
-from tools.static import *
+from config import TEMPFOLDER, MLPACK_BIN
+from tools.static import SKLEARN_ALGO, datasetOutFile, centroidFor, MLPACK_ALGO
+
 
 def computeMD5ResultIdentity(labels):
     md5 = hashlib.md5()

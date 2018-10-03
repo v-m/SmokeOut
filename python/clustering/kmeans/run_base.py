@@ -14,9 +14,13 @@ import cv2
 import numpy as np
 from numpy.core.tests.test_mem_overlap import xrange
 from clustering.tools import dumpDataOnCleanCsv
-from tools.static import *
 
 # https://www.mathworks.com/help/stats/kmeans.html
+from config import MATLAB_EXE, JAVA_EXE, TEMPFOLDER, MLPACK_BIN, R_BIN
+from tools.static import datasetOutFile, centroidFor, MATLAB_ALGO, JAVA_CLASSPATH, WEKA_ALGO, WEKA_UNORM_ALGO, \
+    MLPACK_ALGO, SKLEARN_TOL0_ALGO, SHOGUN_ALGO, TENSORFLOW_ALGO, R_100ITER_ALGO, R_ALGO, OPENCV_ALGO, SKLEARN_ALGO
+
+
 def matlabProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, initialClusters = None):
     outputFile = datasetOutFile(datasetName, MATLAB_ALGO, runinfo=runinfo)
     clustersOutputFile = datasetOutFile(datasetName, centroidFor(MATLAB_ALGO), runinfo=runinfo)
