@@ -120,6 +120,7 @@ class ClusterPipeline:
                         print("Analyzing file...".format(srcFile))
                         groundTruthClustersId = data.target.unique()
                         clustersNumber = len(groundTruthClustersId)
+                        print("#clusters = {}".format(clustersNumber))
 
                         dataLessTarget = data.loc[:, data.columns != 'target']
                     else:

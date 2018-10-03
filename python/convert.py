@@ -18,7 +18,6 @@ features_collection = []
 
 with open(args.file, 'r') as fp:
     content = fp.read()
-
     lines = content.split("\n")
     progress, total = 1, len(lines)
 
@@ -35,10 +34,8 @@ with open(args.file, 'r') as fp:
             if featureid > max_features:
                 max_features = featureid
 
-        features_encoded = sorted(set(features.keys()))
-
-        assert(len(features_encoded) == len(features))   
-        features_collection.append(features)
+        assert(len(features.keys()) == len(features))   
+        features_collection.append((target, features))
 
     print("{} features".format(max_features), file=sys.stderr)
 
@@ -48,7 +45,7 @@ for i in range(max_features):
     print("f{}".format(i), end='')
 print("")
 
-for features in features_collection:
+for (target, features) in features_collection:
     print("{}/{}".format(progress, total), file=sys.stderr)
     print(target, end='')
     features_encoded = sorted(set(features.keys()))
