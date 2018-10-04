@@ -1,1 +1,0 @@
-export PYTHON_BIN="/Users/vince/anaconda3/bin/python"

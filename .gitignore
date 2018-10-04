@@ -8,3 +8,6 @@ __pycache__
 *.json
 *.xml
 data/
+dataset/
+analysis/
+trash/
