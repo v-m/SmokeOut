@@ -1,7 +1,6 @@
 #
 # Author: Vincenzo Musco (http://www.vmusco.com)
 import os
-import sklearn.metrics
 
 # TOOLKITS CONSTANTS
 MATLAB_ALGO = "matlab"
@@ -35,18 +34,6 @@ JAVA_CLASSPATH = ":".join([
                     os.path.abspath("{}/../../java/deps/weka-stable-3.8.0.jar".format(os.path.dirname(__file__))),
                     os.path.abspath("{}/../../java/deps/bounce-0.18.jar".format(os.path.dirname(__file__)))
                 ])
-
-
-SCORING_METRICS = [sklearn.metrics.adjusted_rand_score,
-
-                   sklearn.metrics.adjusted_mutual_info_score,
-                   sklearn.metrics.normalized_mutual_info_score,
-
-                   sklearn.metrics.homogeneity_score,
-                   sklearn.metrics.completeness_score,
-                   sklearn.metrics.v_measure_score,
-
-                   sklearn.metrics.fowlkes_mallows_score]
 
 def exploreDatasets(root):
     for datasetName in os.listdir(root):
