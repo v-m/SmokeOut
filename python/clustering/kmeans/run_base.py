@@ -6,13 +6,6 @@ import os
 import subprocess
 import time
 import re
-import pandas
-import sklearn.cluster
-import tensorflow as tf
-import shogun
-import cv2
-import numpy as np
-from numpy.core.tests.test_mem_overlap import xrange
 from clustering.tools import dumpDataOnCleanCsv
 
 # https://www.mathworks.com/help/stats/kmeans.html
@@ -143,6 +136,8 @@ def mlpackProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, i
     os.unlink(tempFile2)
 
 def sklearnProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, initialClusters = None, zeroTolerance = False):
+    import sklearn.cluster
+
     selectedAlgo = SKLEARN_TOL0_ALGO if zeroTolerance else SKLEARN_ALGO
     outputFile = datasetOutFile(datasetName, selectedAlgo, runinfo=runinfo)
     clustersOutputFile = datasetOutFile(datasetName, centroidFor(selectedAlgo), runinfo=runinfo)
@@ -188,6 +183,8 @@ def sklearnProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, 
 
 
 def shogunProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, initialClusters = None):
+    import shogun
+
     outputFile = datasetOutFile(datasetName, SHOGUN_ALGO, runinfo=runinfo)
     clustersOutputFile = datasetOutFile(datasetName, centroidFor(SHOGUN_ALGO), runinfo=runinfo)
 
@@ -233,6 +230,9 @@ def shogunProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, i
 
 
 def opencvProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, initialClusters = None):
+    import cv2
+    import numpy as np
+
     outputFile = datasetOutFile(datasetName, OPENCV_ALGO, runinfo=runinfo)
     clustersOutputFile = datasetOutFile(datasetName, centroidFor(OPENCV_ALGO), runinfo=runinfo)
 
@@ -264,6 +264,8 @@ def opencvProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, i
 
 
 def rProcess(srcFile, datasetName, runinfo = None, initialClustersCsvFile = None, hundredIters = False):
+    import pandas
+    
     if initialClustersCsvFile is None and hundredIters:
         print("R kcca function don't have the iteration parameter !")
         return
@@ -290,6 +292,9 @@ def rProcess(srcFile, datasetName, runinfo = None, initialClustersCsvFile = None
 
 
 def tensorflowProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, initialClusters = None):
+    import tensorflow as tf
+    from numpy.core.tests.test_mem_overlap import xrange
+
     '''
     https://www.tensorflow.org/api_docs/python/tf/contrib/factorization/KMeansClustering
     '''

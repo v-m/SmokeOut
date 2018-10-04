@@ -5,18 +5,11 @@ import csv
 import os
 import re
 import subprocess
-import tensorflow as tf
-from numpy.core.tests.test_mem_overlap import xrange
-import numpy as np
-
-import sklearn.mixture
-from tensorflow.python.framework import constant_op
 
 from clustering.tools import dumpDataOnCleanCsv
 from config import MATLAB_EXE, TEMPFOLDER, JAVA_EXE
 from tools.static import datasetOutFile, MATLAB_ALGO, matlabRedirectTempFolder, WEKA_ALGO, JAVA_CLASSPATH, \
     SKLEARN_TOL0_ALGO, SKLEARN_ALGO, TENSORFLOW_ALGO, centroidFor
-
 
 def matlabProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None):
     outputFile = datasetOutFile(datasetName, MATLAB_ALGO, runinfo=runinfo)
@@ -56,7 +49,6 @@ def wekaProcess(inFile, datasetName, runinfo = None):
         print("weka skipped")
         return
 
-
     command_parts = [JAVA_EXE, "-Xmx100g", "-classpath", JAVA_CLASSPATH, "EMWekaRun", inFile, outputFile]
     print(" ".join(command_parts))
 
@@ -65,7 +57,9 @@ def wekaProcess(inFile, datasetName, runinfo = None):
 
 
 def sklearnProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, zeroTolerance = False):
-    # selectedAlgo = SKLEARN_ALGO
+    # Local import
+    import sklearn.mixture
+
     selectedAlgo = SKLEARN_TOL0_ALGO if zeroTolerance else SKLEARN_ALGO
     outputFile = datasetOutFile(datasetName, selectedAlgo, runinfo=runinfo)
 
@@ -112,6 +106,10 @@ def sklearnProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, 
 
 
 def tensorflowProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, initialClusters = None):
+    # Local import
+    import tensorflow as tf
+    from tensorflow.python.framework import constant_op
+    import numpy as np
     '''
     https://www.tensorflow.org/api_docs/python/tf/contrib/factorization/KMeansClustering
     '''

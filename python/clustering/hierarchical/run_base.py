@@ -6,13 +6,10 @@ import os
 import re
 import subprocess
 
-# import shogun
-import sklearn.cluster
-
 from clustering.tools import dumpDataOnCleanCsv
 from config import MATLAB_EXE, TEMPFOLDER, JAVA_EXE, R_BIN
 from tools.static import datasetOutFile, MATLAB_ALGO, matlabRedirectTempFolder, WEKA_ALGO, JAVA_CLASSPATH, SKLEARN_ALGO, \
-    R_ALGO
+    R_ALGO, SHOGUN_ALGO
 
 
 def matlabProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None):
@@ -62,6 +59,8 @@ def wekaProcess(inFile, datasetName, runinfo = None):
 
 
 def sklearnProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None):
+    import sklearn.cluster
+    
     selectedAlgo = SKLEARN_ALGO
     outputFile = datasetOutFile(datasetName, selectedAlgo, runinfo=runinfo)
 
@@ -79,32 +78,34 @@ def sklearnProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None):
             filewriter.writerow([index, builtModel.labels_[index]])
 
 
-#
-#
-# def shogunProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, initialClusters = None):
-#     outputFile = datasetOutFile(datasetName, SHOGUN_ALGO, runinfo=runinfo)
-#
-#     if os.path.exists(outputFile):
-#         print("shogun skipped")
-#         return
-#
-#     train_features = shogun.RealFeatures(dataLessTarget.values.astype("float64").transpose())
-#     # distance metric over feature matrix - Euclidean distance
-#     distance = shogun.EuclideanDistance(train_features, train_features)
-#
-#     hierarchical = shogun.Hierarchical(clustersNumber, distance)
-#
-#     #TODO Makes the pyhon process dies!!!???!!!
-#     #
-#     # d = hierarchical.get_merge_distances()
-#     # cp = hierarchical.get_cluster_pairs()
-#     #
-#     # with open(outputFile, 'w') as csvfile:
-#     #     filewriter = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
-#     #
-#     #     for index, row in dataLessTarget.iterrows():
-#     #         filewriter.writerow([index, result[index].item(0)])
-#
+
+#TODO Makes the pyhon process dies!!!???!!!
+def shogunProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, initialClusters = None):
+    import shogun
+
+    outputFile = datasetOutFile(datasetName, SHOGUN_ALGO, runinfo=runinfo)
+
+    if os.path.exists(outputFile):
+        print("shogun skipped")
+        return
+
+    train_features = shogun.RealFeatures(dataLessTarget.values.astype("float64").transpose())
+    # distance metric over feature matrix - Euclidean distance
+    distance = shogun.EuclideanDistance(train_features, train_features)
+
+    hierarchical = shogun.Hierarchical(clustersNumber, distance)
+
+    #TODO Makes the pyhon process dies!!!???!!!
+
+    d = hierarchical.get_merge_distances()
+    cp = hierarchical.get_cluster_pairs()
+    
+    with open(outputFile, 'w') as csvfile:
+        filewriter = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
+    
+        for index, row in dataLessTarget.iterrows():
+            filewriter.writerow([index, result[index].item(0)])
+
 
 
 

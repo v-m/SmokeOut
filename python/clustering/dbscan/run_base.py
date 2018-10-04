@@ -6,8 +6,6 @@ import os
 import subprocess
 import time
 
-import sklearn.cluster
-
 from config import TEMPFOLDER, MLPACK_BIN
 from tools.static import SKLEARN_ALGO, datasetOutFile, centroidFor, MLPACK_ALGO
 
@@ -34,6 +32,7 @@ def dumpDataOnCleanCsv(dataLessTarget):
 
 #http://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html
 def sklearnProcess(dataLessTarget, datasetName, runinfo = None):
+    import sklearn.cluster
     selectedAlgo = SKLEARN_ALGO
     outputFile = datasetOutFile(datasetName, selectedAlgo, runinfo=runinfo)
     clustersOutputFile = datasetOutFile(datasetName, centroidFor(selectedAlgo), runinfo=runinfo)

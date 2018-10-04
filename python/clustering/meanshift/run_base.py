@@ -2,10 +2,8 @@ import csv
 import os
 import subprocess
 import time
-import sklearn.cluster
 
 from clustering.tools import dumpDataOnCleanCsv
-
 
 #ALGONAME = "meanshift_"
 from config import TEMPFOLDER, MLPACK_BIN
@@ -44,6 +42,8 @@ def mlpackProcess(dataLessTarget, datasetName, runinfo = None):
     os.unlink(tempFile2)
 
 def sklearnProcess(dataLessTarget, datasetName, runinfo = None):
+    import sklearn.cluster
+
     selectedAlgo = SKLEARN_ALGO
     outputFile = datasetOutFile(datasetName, selectedAlgo, runinfo=runinfo)
     clustersOutputFile = datasetOutFile(datasetName, centroidFor(selectedAlgo), runinfo=runinfo)
