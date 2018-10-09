@@ -1,4 +1,5 @@
 from setuptools import setup
+from glob import glob
 
 setup(name='mlperf',
       version='0.1a1',
@@ -18,6 +19,12 @@ setup(name='mlperf',
       license='MIT',
       packages=['mlperf.clustering', 'mlperf.clustering.gaussianmixture', 'mlperf.clustering.hierarchical',
                 'mlperf.clustering.kmeans', 'mlperf.tools'],
+      data_files=[('java', ['java/deps/bounce-0.18.jar',
+                            'java/deps/weka-stable-3.8.0.jar',
+                            'java/build/classes/java/main/EMWekaRun.class',
+                            'java/build/classes/java/main/HierarchicalWekaRun.class',
+                            'java/build/classes/java/main/WekaRun.class',
+                            'java/build/classes/java/main/WekaRunNorm.class'])],
       install_requires=['numpy', 'pandas', 'scipy'],
       scripts=['bin/generate-clusters', 'bin/convert-sparse-dense'],
       include_package_data=True,
