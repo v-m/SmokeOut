@@ -1,6 +1,3 @@
-#
-# Author: Vincenzo Musco (http://www.vmusco.com)
-
 import csv
 import os
 import re
