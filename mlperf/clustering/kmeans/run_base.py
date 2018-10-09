@@ -11,7 +11,8 @@ from mlperf.clustering.tools import dumpDataOnCleanCsv
 # https://www.mathworks.com/help/stats/kmeans.html
 from mlperf.tools.config import MATLAB_EXE, JAVA_EXE, TEMPFOLDER, MLPACK_BIN, R_BIN
 from mlperf.tools.static import datasetOutFile, centroidFor, MATLAB_ALGO, JAVA_CLASSPATH, WEKA_ALGO, WEKA_UNORM_ALGO, \
-    MLPACK_ALGO, SKLEARN_TOL0_ALGO, SHOGUN_ALGO, TENSORFLOW_ALGO, R_100ITER_ALGO, R_ALGO, OPENCV_ALGO, SKLEARN_ALGO
+    MLPACK_ALGO, SKLEARN_TOL0_ALGO, SHOGUN_ALGO, TENSORFLOW_ALGO, R_100ITER_ALGO, R_ALGO, OPENCV_ALGO, SKLEARN_ALGO, \
+    R_SCRIPT_BASE_DIR, matlabRedirectTempFolder
 
 
 def matlabProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None, initialClusters = None):
@@ -279,9 +280,9 @@ def rProcess(srcFile, datasetName, runinfo = None, initialClustersCsvFile = None
         return
 
     if initialClustersCsvFile is None:
-        command_parts = [R_BIN, "--no-save", "--quiet", "clustering/kmeans/kmeans_test.R", srcFile, outputFile, clustersOutputFile]
+        command_parts = [R_BIN, "--no-save", "--quiet", os.path.join(R_SCRIPT_BASE_DIR, "kmeans_test.R"), srcFile, outputFile, clustersOutputFile]
     else:
-        command_parts = [R_BIN, "--no-save", "--quiet", "clustering/kmeans/{}".format("kmeans_test_init_clusters_100it.R" if hundredIters else "kmeans_test_init_clusters.R"), srcFile, outputFile, clustersOutputFile, initialClustersCsvFile]
+        command_parts = [R_BIN, "--no-save", "--quiet", os.path.join(R_SCRIPT_BASE_DIR, "kmeans_test_init_clusters_100it.R" if hundredIters else "kmeans_test_init_clusters.R"), srcFile, outputFile, clustersOutputFile, initialClustersCsvFile]
 
     subprocess.call(command_parts)
 

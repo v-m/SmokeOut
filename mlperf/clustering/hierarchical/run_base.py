@@ -9,7 +9,7 @@ import subprocess
 from mlperf.clustering.tools import dumpDataOnCleanCsv
 from mlperf.tools.config import MATLAB_EXE, TEMPFOLDER, JAVA_EXE, R_BIN
 from mlperf.tools.static import datasetOutFile, MATLAB_ALGO, matlabRedirectTempFolder, WEKA_ALGO, JAVA_CLASSPATH, \
-    SKLEARN_ALGO, R_ALGO, SHOGUN_ALGO
+    SKLEARN_ALGO, R_ALGO, SHOGUN_ALGO, R_SCRIPT_BASE_DIR
 
 
 def matlabProcess(clustersNumber, dataLessTarget, datasetName, runinfo = None):
@@ -117,5 +117,5 @@ def rProcess(srcFile, datasetName, runinfo = None):
         print("R skipped")
         return
 
-    command_parts = [R_BIN, "--no-save", "--quiet", "clustering/hierarchical/hierarchical_test.R", srcFile, outputFile]
+    command_parts = [R_BIN, "--no-save", "--quiet", os.join(R_SCRIPT_BASE_DIR, "hierarchical_test.R"), srcFile, outputFile]
     subprocess.call(command_parts)

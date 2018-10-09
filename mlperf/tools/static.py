@@ -1,7 +1,7 @@
 #
 # Author: Vincenzo Musco (http://www.vmusco.com)
 import os
-from glob import glob
+from mlperf import get_data
 
 # TOOLKITS CONSTANTS
 MATLAB_ALGO = "matlab"
@@ -27,12 +27,17 @@ KMEANS_PLUSPLUS_ALGO = "kpp_run"
 MEANSHIFT_ALGO = "meanshift"
 SPECTRAL_ALGO = "spectralclustering"
 
-# Dynamically building the JAVA_CLASSPATH for Weka
-JAVA_CLASSPATH = list(map(lambda x: os.path.dirname(x), glob("**/EMWekaRun.class", recursive=True)))
-JAVA_CLASSPATH.extend(glob("**/weka-stable-3.8.0.jar", recursive=True))
-JAVA_CLASSPATH.extend(glob("**/bounce-0.18.jar", recursive=True))
+JAVA_CLASSPATH = [
+    get_data('java/main'),
+    get_data('java/lib/weka-stable-3.8.0.jar'),
+    get_data('java/lib/bounce-0.18.jar')
+]
 
 JAVA_CLASSPATH = ":".join(JAVA_CLASSPATH)
+R_SCRIPT_BASE_DIR = get_data('R')
+
+print("*****")
+print(JAVA_CLASSPATH)
 
 INCLUDED_ALGO = {
     SPECTRAL_ALGO: [SKLEARN_ALGO, SKLEARN__FAST_ALGO, R_ALGO],

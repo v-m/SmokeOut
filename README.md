@@ -16,3 +16,9 @@ This tool expect to get the binary path in two flavors:
     | `MLP_TEMPFOLDER` | A temporary folder to work in | `/tmp` |
 
 The latter may require you to write a short bash script for initializing the variables.
+
+
+
+## Additional notes
+
+To build Weka classes, use: `gradle compileJava`.
