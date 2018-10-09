@@ -2,7 +2,7 @@
 
 import sys
 
-from mlperf.tools.static import KMEANS_ALGO, KMEANS_PLUSPLUS_ALGO, HIERARCHICAL_ALGO, GAUSSIANMIX_ALGO
+from mlperf.tools.static import KMEANS_ALGO, KMEANS_PLUSPLUS_ALGO, HIERARCHICAL_ALGO, GAUSSIANMIX_ALGO, SPECTRAL_ALGO, AFFINITY_PROP_ALGO, DBSCAN_ALGO
 
 def help():
     print("Please select an algorithm:")
@@ -10,6 +10,9 @@ def help():
     print('\t%20s : %s'%(KMEANS_PLUSPLUS_ALGO, "K-means++ (initial starting point)"))
     print('\t%20s : %s'%(HIERARCHICAL_ALGO, "Hierarchical Clustering"))
     print('\t%20s : %s'%(GAUSSIANMIX_ALGO, "Gaussian Mixtures"))
+    print('\t%20s : %s'%(SPECTRAL_ALGO, "Spectral Clustering"))
+    print('\t%20s : %s'%(AFFINITY_PROP_ALGO, "Affinity Propagation"))
+    print('\t%20s : %s'%(DBSCAN_ALGO, "DBSCAN"))
 
 
 if len(sys.argv) < 2:
@@ -25,5 +28,12 @@ else:
         import mlperf.clustering.clustering_kmeans_initrand
     elif theArg == KMEANS_PLUSPLUS_ALGO:
         import mlperf.clustering.clustering_kmeans_kpp
+    elif theArg == SPECTRAL_ALGO:
+        import mlperf.clustering.clustering_spectral_clustering
+    elif theArg == AFFINITY_PROP_ALGO:
+        import mlperf.clustering.clustering_apcluster
+    elif theArg == DBSCAN_ALGO:
+        import mlperf.clustering.clustering_dbscan
+
     else:
         help()
