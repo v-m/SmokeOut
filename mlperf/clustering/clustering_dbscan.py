@@ -2,7 +2,7 @@
 # cf. Xin for exact implementation
 # Author: Vincenzo Musco (http://www.vmusco.com)
 
-import mlperf.clustering.affinitypropagation.run_base as run
+import mlperf.clustering.dbscan.run_base as run
 from mlperf.clustering.main_clustering import ClusterPipeline
 from mlperf.tools.static import DBSCAN_ALGO, INCLUDED_ALGO
 
