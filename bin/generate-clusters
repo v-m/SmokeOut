@@ -1,39 +1,183 @@
 #!/usr/bin/env python
 
+import argparse
+import os
 import sys
+import importlib
+import traceback
 
-from mlperf.tools.static import KMEANS_ALGO, KMEANS_PLUSPLUS_ALGO, HIERARCHICAL_ALGO, GAUSSIANMIX_ALGO, SPECTRAL_ALGO, AFFINITY_PROP_ALGO, DBSCAN_ALGO
+import pandas
 
-def help():
-    print("Please select an algorithm:")
-    print('\t%20s : %s'%(KMEANS_ALGO, "K-means (initial starting point)"))
-    print('\t%20s : %s'%(KMEANS_PLUSPLUS_ALGO, "K-means++ (initial starting point)"))
-    print('\t%20s : %s'%(HIERARCHICAL_ALGO, "Hierarchical Clustering"))
-    print('\t%20s : %s'%(GAUSSIANMIX_ALGO, "Gaussian Mixtures"))
-    print('\t%20s : %s'%(SPECTRAL_ALGO, "Spectral Clustering"))
-    print('\t%20s : %s'%(AFFINITY_PROP_ALGO, "Affinity Propagation"))
-    print('\t%20s : %s'%(DBSCAN_ALGO, "DBSCAN"))
+import mlperf.clustering.toolkits
+import inspect
+
+from mlperf.clustering.clusteringtoolkit import AlreadyRanException
+from mlperf.clustering.tools import draw_centroids, run_for_nr
 
 
-if len(sys.argv) < 2:
-    help()
+def configure_arg_parse_optionals(parser, enforce_dataset_check=False):
+    parser.add_argument('--base', '-b', type=int, action='append', help='Execute only RUN x', default=0)
+    parser.add_argument('--runs', '-r', type=int, help='Number of runs to perform', default=30)
+    parser.add_argument('--basepath-dataset', '-a', type=str,
+                        help='Specify the absolute part of the path for dataset selection', default=None)
+    parser.add_argument('--dataset', '-d', action='append', required=enforce_dataset_check,
+                        help='Run this dataset tsv file', default=None)
+    parser.add_argument('--overwrite', '-o', action='store_true',
+                        help='If a specific run is already ran, recompute it anyway', default=False)
+    parser.add_argument('--reuse', '-s', action='store_true',
+                        help='If several dataset, perform all runs before going to the next dataset (no dataset interlacement).')
+    parser.add_argument('--init', '-i', type=str,
+                        help='Parameters needed to initialize the toolkit/variant.')
+
+
+toolkit = os.listdir(mlperf.clustering.toolkits.__path__[0])
+toolkit = filter(lambda x: x[0] != "_", toolkit)
+toolkit = map(lambda x: x[:-3], toolkit)
+toolkit = list(toolkit)
+
+parser = argparse.ArgumentParser(description='Generate clusters for dataset', add_help=False)
+parser.add_argument("toolkit", choices=toolkit)
+parser.add_argument('variant', nargs='?', help="toolkit specific")
+parser.add_argument('algorithm', nargs='?', help="toolkit/variant specific")
+parser.add_argument('--help', action='store_true')
+configure_arg_parse_optionals(parser)
+
+args = parser.parse_args()
+toolkit = args.toolkit
+
+print("\nNow loading module {}".format(toolkit), file=sys.stderr)
+print("If any error arise now, please check that the toolkit is fully installed and working on this system\n".format(
+    toolkit), file=sys.stderr)
+try:
+    i = importlib.import_module("{}.{}".format(mlperf.clustering.toolkits.__package__, toolkit))
+    print("✔ Module {} loaded successfully.".format(toolkit), file=sys.stderr)
+except Exception as e:
+    print("⨯ Error importing module {}. Please check your system installation.".format(toolkit), file=sys.stderr)
+    print(e, file=sys.stderr)
+    sys.exit(1)
+# print("=== ".format(toolkit), file=sys.stderr)
+
+## Toolkit Variant
+argument_position = sys.argv.index(toolkit)
+argument_value = sys.argv.pop(argument_position)
+sys.argv[0] = "{} {}".format(sys.argv[0], argument_value)
+
+available_classes = list(filter(lambda x: inspect.isclass(getattr(i, x)), dir(i)))
+available_variants_algorithms = {}
+
+for a_class in available_classes:
+    the_class_info = getattr(i, a_class)
+
+    functions = inspect.getmembers(the_class_info, inspect.isfunction)
+    functions = list(filter(lambda x: x[0][0:4] == "run_", functions))
+
+    if len(functions) > 0:
+        available_variants_algorithms[a_class] = list(map(lambda x: x[0][4:], functions))
+
+parser = argparse.ArgumentParser(description='Generate clusters for dataset', add_help=False)
+parser.add_argument("variant", choices=available_variants_algorithms.keys(), help="Variant to run")
+parser.add_argument('algorithm', nargs='?', help="variant specific")
+parser.add_argument('--help', action='store_true')
+configure_arg_parse_optionals(parser)
+args = parser.parse_args()
+variant = args.variant
+
+## Toolkit Algorithm
+argument_position = sys.argv.index(variant)
+argument_value = sys.argv.pop(argument_position)
+sys.argv[0] = "{} {}".format(sys.argv[0], argument_value)
+
+parser = argparse.ArgumentParser(description='Generate clusters for dataset')
+parser.add_argument('algorithm', choices=available_variants_algorithms[variant], help="Algorithm to run")
+configure_arg_parse_optionals(parser, True)
+args = parser.parse_args()
+algorithm = args.algorithm
+
+candidate_class = getattr(i, variant)
+init = {}
+if args.init:
+    for init_option in args.init.split(";"):
+        init_key, init_value = init_option.split("=")
+        init[init_key] = init_value
+
+class_instance = candidate_class(**init)
+class_instance.set_overwrite_ran_iterations(args.overwrite)
+candidate_function = getattr(candidate_class, "run_{}".format(algorithm))
+function_instance = getattr(class_instance, "run_{}".format(algorithm))
+
+## Running Logic
+
+reuse = args.reuse
+if len(args.dataset) == 1:
+    reuse = True
+
+print("Toolkit/Variant/Algorithm = {}/{}/{}".format(toolkit, variant, algorithm))
+print("Runs = {}".format(args.runs))
+print("Dataset = {}".format(args.dataset))
+print("Base = {}".format(args.base))
+print("Reuse = {}".format(reuse))
+
+fulldatasets = args.dataset
+
+if args.basepath_dataset:
+    fulldatasets = list(map(lambda x: "{}/{}".format(args.basepath_dataset, x), fulldatasets))
+
+if reuse:
+    fulldatasets = list(map(lambda x: [x], fulldatasets))
 else:
-    theArg = sys.argv.pop(1)
+    fulldatasets = [fulldatasets]
 
-    if theArg == GAUSSIANMIX_ALGO:
-        import mlperf.clustering.clustering_gaussianmix
-    elif theArg == HIERARCHICAL_ALGO:
-        import mlperf.clustering.clustering_hierarchical
-    elif theArg == KMEANS_ALGO:
-        import mlperf.clustering.clustering_kmeans_initrand
-    elif theArg == KMEANS_PLUSPLUS_ALGO:
-        import mlperf.clustering.clustering_kmeans_kpp
-    elif theArg == SPECTRAL_ALGO:
-        import mlperf.clustering.clustering_spectral_clustering
-    elif theArg == AFFINITY_PROP_ALGO:
-        import mlperf.clustering.clustering_apcluster
-    elif theArg == DBSCAN_ALGO:
-        import mlperf.clustering.clustering_dbscan
+for datasets in fulldatasets:
+    data = None
+    groundTruthClustersId = None
+    clustersNumber = None
+    dataLessTarget = None
 
-    else:
-        help()
+    for runid in range(args.runs):
+        resolved_run_nr = args.base + runid
+        RUN_INFO = run_for_nr(class_instance.toolkit_name(), resolved_run_nr)
+        print("*****")
+        print("RUN: {}".format(RUN_INFO))
+        print("*****")
+        for dataset in datasets:
+            srcFile = dataset
+
+            if data is None or not reuse:
+                print("Reading file {}...".format(srcFile))
+                # data = pandas.read_csv(srcFile, sep='\t')
+                # data = dd.read_csv(srcFile, sep='\t')
+
+                chunksize = 100000
+                text_file_reader = pandas.read_csv(srcFile, sep='\t', chunksize=chunksize, iterator=True)
+                data = pandas.concat(text_file_reader, ignore_index=True)
+
+                print("Analyzing file...")
+                groundTruthClustersId = data.target.unique()
+                clustersNumber = len(groundTruthClustersId)
+                print("#clusters = {}".format(clustersNumber))
+
+                dataLessTarget = data.loc[:, data.columns != 'target']
+            else:
+                print("Reusing previously loaded information...")
+
+            print("RUN {}. ALGO = {}".format(runid, algorithm))
+            try:
+                if algorithm == 'ap':
+                    # AP Cluster does not expect a #clusters
+                    function_instance(srcFile, dataLessTarget, dataset, resolved_run_nr, RUN_INFO)
+                    pass
+                elif algorithm == 'kmeans':
+                    # Kmeans requires centroid input !
+                    centroids_file, centroids = draw_centroids(srcFile, runid, groundTruthClustersId, data)
+                    function_instance(clustersNumber, srcFile, dataLessTarget, dataset, centroids_file, centroids,
+                                      resolved_run_nr, RUN_INFO)
+                else:
+                    function_instance(clustersNumber, srcFile, dataLessTarget, dataset, resolved_run_nr, RUN_INFO)
+            except Exception as e:
+                print("!!!!! Exception occured !!!!!")
+                print(sys.exc_info())
+                print(e)
+                traceback.print_exc()
+            except AlreadyRanException as e:
+                print("Skipping...")
+

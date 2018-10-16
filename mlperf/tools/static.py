@@ -1,6 +1,5 @@
 #
 # Author: Vincenzo Musco (http://www.vmusco.com)
-import os
 from mlperf import get_data
 
 # TOOLKITS CONSTANTS
@@ -35,59 +34,3 @@ JAVA_CLASSPATH = [
 
 JAVA_CLASSPATH = ":".join(JAVA_CLASSPATH)
 R_SCRIPT_BASE_DIR = get_data('R')
-
-INCLUDED_ALGO = {
-    SPECTRAL_ALGO: [SKLEARN_ALGO, SKLEARN__FAST_ALGO, R_ALGO],
-    MEANSHIFT_ALGO: [SKLEARN_ALGO],
-    KMEANS_PLUSPLUS_ALGO: [SKLEARN_ALGO,
-                           SKLEARN_TOL0_ALGO,
-                           R_ALGO,
-                           R_100ITER_ALGO,
-                           MLPACK_ALGO,
-                           MATLAB_ALGO,
-                           WEKA_ALGO,
-                           WEKA_UNORM_ALGO,
-                           SHOGUN_ALGO,
-                           OPENCV_ALGO,
-                           TENSORFLOW_ALGO],
-    KMEANS_ALGO: [SKLEARN_ALGO,
-                  SKLEARN_TOL0_ALGO,
-                  R_ALGO,
-                  MLPACK_ALGO,
-                  MATLAB_ALGO,
-                  SHOGUN_ALGO,
-                  R_100ITER_ALGO,
-                  TENSORFLOW_ALGO],
-    HIERARCHICAL_ALGO: [
-        SKLEARN_ALGO
-        # , WEKA_ALGO
-        , R_ALGO
-        , MATLAB_ALGO
-        # , SHOGUN_ALGO  --> Shogun makes python crash (!?)
-    ],
-    GAUSSIANMIX_ALGO: [SKLEARN_ALGO, SKLEARN_TOL0_ALGO, MATLAB_ALGO, WEKA_ALGO, TENSORFLOW_ALGO],
-    DBSCAN_ALGO: [SKLEARN_ALGO, R_ALGO, MLPACK_ALGO],
-    AFFINITY_PROP_ALGO: [SKLEARN_ALGO, R_ALGO]
-}
-
-
-def exploreDatasets(root):
-    for datasetName in os.listdir(root):
-        if os.path.isdir(os.path.join(root, datasetName)):
-            yield datasetName
-
-
-def datasetOutFile(datasetName, algoName, ext="csv", runinfo=None):
-    return "{}.{}{}.{}".format(datasetName, algoName, ".{}".format(runinfo) if runinfo is not None else "", ext)
-
-
-def centroidFor(algoName):
-    return "{}.centroids".format(algoName)
-
-
-def runForNr(runBase, runId):
-    return "{}{}".format(runBase, runId)
-
-
-def matlabRedirectTempFolder(tempdir):
-    return "tempdir='{}';".format(tempdir)

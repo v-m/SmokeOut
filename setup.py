@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='mlperf',
-      version='0.1a1',
+      version='1.0a1',
       description='Machine Learning Performance Assessor',
       long_description='Machine Learning Performance Assessor',
       classifiers=[
@@ -16,9 +16,7 @@ setup(name='mlperf',
       author='Vincenzo Musco',
       author_email='muscovin@gmail.com',
       license='MIT',
-      packages=['mlperf', 'mlperf.clustering', 'mlperf.clustering.gaussianmixture', 'mlperf.clustering.hierarchical',
-                'mlperf.clustering.kmeans', 'mlperf.clustering.spectralclustering', 'mlperf.clustering.affinitypropagation', 
-                'mlperf.clustering.dbscan', 'mlperf.tools'],
+      packages=['mlperf', 'mlperf.clustering', 'mlperf.clustering.toolkits', 'mlperf.tools'],
       install_requires=['numpy', 'pandas', 'scipy'],
       scripts=['bin/generate-clusters', 'bin/convert-sparse-dense'],
       include_package_data=True,
