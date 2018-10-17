@@ -8,6 +8,7 @@ from mlperf.clustering import clusteringtoolkit
 from mlperf.clustering.clusteringtoolkit import ClusteringToolkit
 from mlperf.tools.static import SHOGUN_ALGO
 
+
 class Shogun(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
         return SHOGUN_ALGO
@@ -37,7 +38,8 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
 
         return centers, result
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         train_features = shogun.RealFeatures(data_without_target.values.astype("float64").transpose())
@@ -49,13 +51,15 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
         # set KMeans++ flag
         kmeans.set_use_kmeanspp(True)
 
+        if nb_iterations is not None:
+            kmeans.set_max_iter(nb_iterations)
+
         centers, result = Shogun._kmeans_process(kmeans)
         ClusteringToolkit._save_clustering(Shogun._clustering_to_list(data_without_target, result), output_file)
         ClusteringToolkit._save_centroids(Shogun._centroids_to_list(centers), centroids_file)
 
-
-
-    def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file, initial_clusters, run_number, run_info=None):
+    def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
+                   initial_clusters, run_number, run_info=None, nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         train_features = shogun.RealFeatures(data_without_target.values.astype("float64").transpose())
@@ -66,6 +70,9 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
         kmeans = shogun.KMeans(nb_clusters, distance)
         # set new initial centers
         kmeans.set_initial_centers(initial_clusters.astype("float64").transpose())
+
+        if nb_iterations is not None:
+            kmeans.set_max_iter(nb_iterations)
 
         centers, result = Shogun._kmeans_process(kmeans)
         ClusteringToolkit._save_clustering(Shogun._clustering_to_list(data_without_target, result), output_file)

@@ -19,25 +19,34 @@ class R(clusteringtoolkit.ClusteringToolkit):
         return R_ALGO
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
-                   initial_clusters, run_number, run_info=None):
+                   initial_clusters, run_number, run_info=None, nb_iterations=None):
         # if initialClustersCsvFile is None and hundredIters:
         #     print("R kcca function don't have the iteration parameter !")
         #     return
 
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
-        command_parts = [R_BIN, "--no-save", "--quiet", path.join(R_SCRIPT_BASE_DIR, "kmeans_test_init_clusters.R"),
+        script_file = "kmeans_test_init_clusters.R" if nb_iterations is None else "kmeans_test_init_clusters_n_it.R"
+        command_parts = [R_BIN, "--no-save", "--quiet", path.join(R_SCRIPT_BASE_DIR, script_file),
                          src_file, output_file, centroids_file, initial_clusters_file]
+        if nb_iterations is not None:
+            command_parts.append("{}".format(nb_iterations))
+
         subprocess.call(command_parts)
 
         dta = pandas.read_csv(centroids_file)
         dta.drop(dta.columns[[0]], axis=1).to_csv(centroids_file, index=False, header=False)
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
-        command_parts = [R_BIN, "--no-save", "--quiet", path.join(R_SCRIPT_BASE_DIR, "kmeans_test.R"), src_file,
+        script_file = "kmeans_test.R" if nb_iterations is None else "kmeans_test_n_it.R"
+        command_parts = [R_BIN, "--no-save", "--quiet", path.join(R_SCRIPT_BASE_DIR, script_file), src_file,
                          output_file, centroids_file]
+        if nb_iterations is not None:
+            command_parts.append("{}".format(nb_iterations))
+
         subprocess.call(command_parts)
 
         dta = pandas.read_csv(centroids_file)

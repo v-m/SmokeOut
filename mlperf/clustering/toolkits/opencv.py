@@ -35,18 +35,25 @@ class OpenCV(clusteringtoolkit.ClusteringToolkit):
 
     def __init__(self):
         super().__init__()
-        # Define criteria = ( type, max_iter = 10 , epsilon = 1.0 )
-        self.criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.0)
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
-        ret = cv2.kmeans(np.float32(data_without_target.values), nb_clusters, None, self.criteria, 10,
+
+        # Define criteria = ( type, max_iter = 10 , epsilon = 1.0 )
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100 if nb_iterations is None else nb_iterations, 0.0)
+
+        ret = cv2.kmeans(np.float32(data_without_target.values), nb_clusters, None, criteria, 10,
                          flags=cv2.KMEANS_PP_CENTERS)
         OpenCV._save_run(ret, data_without_target, output_file, centroids_file)
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
-                   initial_clusters, run_number, run_info=None):
+                   initial_clusters, run_number, run_info=None, nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
-        ret = cv2.kmeans(np.float32(data_without_target.values), nb_clusters, initial_clusters, self.criteria, 10,
+
+        # Define criteria = ( type, max_iter = 10 , epsilon = 1.0 )
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100 if nb_iterations is None else nb_iterations, 0.0)
+
+        ret = cv2.kmeans(np.float32(data_without_target.values), nb_clusters, initial_clusters, criteria, 10,
                          flags=cv2.KMEANS_USE_INITIAL_LABELS)
         OpenCV._save_run(ret, data_without_target, output_file, centroids_file)

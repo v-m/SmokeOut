@@ -9,8 +9,10 @@ from mlperf.tools.static import SKLEARN_ALGO, SKLEARN__FAST_ALGO, SKLEARN_TOL0_A
 import numpy as np
 import sklearn.cluster
 
+
 class Sklearn(clusteringtoolkit.ClusteringToolkit):
     """Toolkit class embedding utils functions"""
+
     def _clustering_to_list(self, data_without_target, model):
         clustering = []
         for index, row in data_without_target.iterrows():
@@ -31,38 +33,60 @@ class SklearnCustomTolerance(Sklearn):
         super().__init__()
         self.tolerance = tolerance
 
-        if type(self.tolerance) == str:
+        if self.tolerance is not None and type(self.tolerance) == str:
             self.tolerance = float(self.tolerance)
 
     def toolkit_name(self):
         return SKLEARN_TOL0_ALGO
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         # Create a KMean model.
-        sklearn_kmean_model = sklearn.cluster.KMeans(n_clusters=nb_clusters, tol=self.tolerance)
+
+        # Create a KMean model.
+        params = {"n_clusters": nb_clusters}
+        if self.tolerance is not None:
+            params['tol'] = self.tolerance
+        if nb_iterations is not None:
+            params['max_iter'] = nb_iterations
+
+        sklearn_kmean_model = sklearn.cluster.KMeans(**params)
         sklearn_kmean_model.fit(data_without_target)
         sklearn_kmean_model.fit(data_without_target)
 
-        ClusteringToolkit._save_clustering(self._clustering_to_list(data_without_target, sklearn_kmean_model.labels_), output_file)
+        ClusteringToolkit._save_clustering(self._clustering_to_list(data_without_target, sklearn_kmean_model.labels_),
+                                           output_file)
         ClusteringToolkit._save_centroids(self._centroids_to_list(sklearn_kmean_model), centroids_file)
 
-    def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file, initial_clusters, run_number, run_info=None):
+    def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
+                   initial_clusters, run_number, run_info=None, nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         # Create a KMean model.
-        sklearn_kmean_model = sklearn.cluster.KMeans(n_clusters=nb_clusters, init=initial_clusters, tol=self.tolerance)
+        params = {"n_clusters": nb_clusters, "init": initial_clusters}
+        if self.tolerance is not None:
+            params['tol'] = self.tolerance
+        if nb_iterations is not None:
+            params['max_iter'] = nb_iterations
+
+        sklearn_kmean_model = sklearn.cluster.KMeans(**params)
         sklearn_kmean_model.fit(data_without_target)
         sklearn_kmean_model.fit(data_without_target)
 
-        ClusteringToolkit._save_clustering(self._clustering_to_list(data_without_target, sklearn_kmean_model.labels_), output_file)
+        ClusteringToolkit._save_clustering(self._clustering_to_list(data_without_target, sklearn_kmean_model.labels_),
+                                           output_file)
         ClusteringToolkit._save_centroids(self._centroids_to_list(sklearn_kmean_model), centroids_file)
 
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)
 
-        built_model = sklearn.mixture.GaussianMixture(n_components=nb_clusters, tol=self.tolerance)
+        params = {'n_components': nb_clusters}
+        if self.tolerance is not None:
+            params['tol'] = self.tolerance
+
+        built_model = sklearn.mixture.GaussianMixture(**params)
         built_model.fit(data_without_target)
 
         predicted_labels = built_model.predict(data_without_target)
@@ -76,16 +100,31 @@ class SklearnVanilla(SklearnCustomTolerance):
         return SKLEARN_ALGO
 
     def __init__(self):
-        super().__init__(0)
-        self.setup_default_kmeans_tolerance()
+        super().__init__(None)
 
-    def setup_default_kmeans_tolerance(self):
-        default_sklearn_tolerance = inspect.signature(sklearn.cluster.KMeans).parameters['tol']
-        self.tolerance = default_sklearn_tolerance
+    # def setup_default_kmeans_tolerance(self):
+    #     default_sklearn_tolerance = inspect.signature(sklearn.cluster.KMeans).parameters['tol']
+    #     self.tolerance = default_sklearn_tolerance
+    #
+    # def setup_default_gaussian_tolerance(self):
+    #     default_sklearn_tolerance = inspect.signature(sklearn.mixture.GaussianMixture).parameters['tol']
+    #     self.tolerance = default_sklearn_tolerance
 
-    def setup_default_gaussian_tolerance(self):
-        default_sklearn_tolerance = inspect.signature(sklearn.mixture.GaussianMixture).parameters['tol']
-        self.tolerance = default_sklearn_tolerance
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
+        # self.setup_default_kmeans_tolerance()
+        super().run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                                     nb_iterations)
+
+    def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
+                   initial_clusters, run_number, run_info=None, nb_iterations=None):
+        # self.setup_default_kmeans_tolerance()
+        super().run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
+                           initial_clusters, run_number, run_info, nb_iterations)
+
+    def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+        # self.setup_default_gaussian_tolerance()
+        super().run_gaussian(nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info)
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)

@@ -1,5 +1,5 @@
 # Created by: Vincenzo Musco (http://www.vmusco.com)
-# Created on: 5/14/18
+# Created on: 2018-10-16
 
 args = commandArgs(trailingOnly=TRUE)
 
@@ -13,9 +13,8 @@ clustersNumber = nrow(unique(dat["target"]))
 datWithoutTarget = subset( dat, select = -target )
 
 # http://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html
-init_clusters = read.csv(args[4], header = FALSE)
 
-clusteringResult = kmeans(datWithoutTarget, init_clusters, iter.max = 100, algorithm='Lloyd') #, nstart = 2,
+clusteringResult = kmeans(datWithoutTarget, clustersNumber, iter.max = args[4])
 write.csv(clusteringResult["cluster"], file=args[2])
 write.csv(clusteringResult["centers"], file=args[3])
 

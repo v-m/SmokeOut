@@ -4,6 +4,7 @@
 */
 
 import weka.clusterers.SimpleKMeans;
+import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SelectedTag;
@@ -22,11 +23,28 @@ public class WekaRun {
         loader.setSource(new GZIPInputStream(new FileInputStream(args[0])));
 
         SimpleKMeans kmeans = new SimpleKMeans();
-
         kmeans.setSeed(1);
 
         // This is the important parameter to set
         kmeans.setPreserveInstancesOrder(true);
+
+
+        if(args.length > 3){
+            String[] argsParts = args[4].split(";");
+            for(String part : argsParts) {
+                String[] subparts = part.split("=");
+
+                if (subparts[0].equals("nbiter")) {
+                    kmeans.setMaxIterations(Integer.parseInt(subparts[1]));
+                }else if(subparts[0].equals("unorm")) {
+                    EuclideanDistance dist = new EuclideanDistance();
+                    dist.setDontNormalize(true);
+                    kmeans.setDistanceFunction(dist);
+                }
+            }
+        }
+
+
         Instances dataset = loader.getDataSet();
 
         HashSet<Double> classes = new HashSet<>();

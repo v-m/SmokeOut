@@ -107,11 +107,13 @@ class ClusteringToolkit:
         return "{}/{}_{}.csv".format(TEMPFOLDER, int(time.time()), random.randint(1, 10000))
 
     @NotImplementedError
-    def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file, initial_clusters, run_number, run_info=None):
+    def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
+                   initial_clusters, run_number, run_info=None, nb_iterations=None):
         pass
 
     @NotImplementedError
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
         pass
 
     @NotImplementedError

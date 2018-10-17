@@ -36,7 +36,7 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
     # http://mlpack.org/man/kmeans.html
     # http://www.mlpack.org/docs/mlpack-2.1.0/doxygen/formatdoc.html
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
-                   initial_clusters, run_number, run_info=None):
+                   initial_clusters, run_number, run_info=None, nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
         temp_file = self._dump_data_on_clean_csv(data_without_target)
         temp_file2 = "{}/{}b.csv".format(TEMPFOLDER, int(time.time()))
@@ -45,19 +45,26 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
         command_parts = ["{}/mlpack_kmeans".format(MLPACK_BIN), "--clusters", str(nb_clusters), "-i", temp_file, "-I",
                          initial_clusters_file, "-a", "naive", "-o", temp_file2, "-C", centroids_file]
 
+        if nb_iterations is not None:
+            command_parts.extend(['-m', '{}'.format(nb_iterations)])
+
         subprocess.call(command_parts)
 
         self._save_mlpack_output(temp_file2, output_file)
         unlink(temp_file)
         unlink(temp_file2)
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
         temp_file = self._dump_data_on_clean_csv(data_without_target)
         temp_file2 = "{}/{}b.csv".format(TEMPFOLDER, int(time.time()))
 
         command_parts = ["{}/mlpack_kmeans".format(MLPACK_BIN), "--clusters", str(nb_clusters), "-i", temp_file, "-o",
                          temp_file2, "-a", "naive", "-C", centroids_file]
+
+        if nb_iterations is not None:
+            command_parts.extend(['-m', '{}'.format(nb_iterations)])
 
         subprocess.call(command_parts)
 

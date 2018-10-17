@@ -25,10 +25,22 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
         return WEKA_ALGO
 
     # https://stackoverflow.com/questions/6685961/weka-simple-k-means-clustering-assignments
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
-        weka_command = "WekaRun" if self.normalized else "WekaRunNorm"
-        command_parts = [JAVA_EXE, "-classpath", JAVA_CLASSPATH, weka_command, src_file, output_file, centroids_file]
+        weka_rest = []
+
+        if not self.normalized:
+            weka_rest.append("unorm=1")
+
+        if nb_iterations is not None:
+            weka_rest.append("nbiter={}".format(nb_iterations))
+
+        command_parts = [JAVA_EXE, "-classpath", JAVA_CLASSPATH, "WekaRun", src_file, output_file, centroids_file]
+
+        if len(weka_rest) > 0:
+            command_parts.append(";".join(weka_rest))
+
         subprocess.call(command_parts)
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
@@ -47,17 +59,10 @@ class WekaUnorm(Weka):
     Not normalized version of Weka
     """
     def __init__(self):
-        super().__init__(True)
+        super().__init__(False)
 
     def toolkit_name(self):
         return WEKA_UNORM_ALGO
-
-    # https://stackoverflow.com/questions/6685961/weka-simple-k-means-clustering-assignments
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
-        output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
-        weka_command = "WekaRun" if self.normalized else "WekaRunNorm"
-        command_parts = [JAVA_EXE, "-classpath", JAVA_CLASSPATH, weka_command, src_file, output_file, centroids_file]
-        subprocess.call(command_parts)
 
     @NotImplementedError
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):

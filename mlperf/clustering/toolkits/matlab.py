@@ -82,7 +82,7 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
                     MatLab._matlab_redirect_temp_folder(TEMPFOLDER), command)]
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
-                   initial_clusters, run_number, run_info=None):
+                   initial_clusters, run_number, run_info=None, nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         temp_file = self._dump_data_on_clean_csv(data_without_target)
@@ -92,8 +92,13 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
             initial_clusters_matlab_string_matrix.append(",".join(map(lambda x: str(x), aClusterFeatures.tolist())))
         initial_clusters_matlab_string_matrix = ";".join(initial_clusters_matlab_string_matrix)
 
-        matlab_command = "kmeans(csvread('{}'), {}, 'Start', [{}])".format(temp_file, str(nb_clusters),
-                                                                                 initial_clusters_matlab_string_matrix)
+        matlab_command_more = ''
+        if nb_iterations is not None:
+            matlab_command_more = ', MaxIter, {}'.format(nb_iterations)
+
+        matlab_command = "kmeans(csvread('{}'), {}, 'Start', [{}]{})".format(temp_file, str(nb_clusters),
+                                                                             initial_clusters_matlab_string_matrix,
+                                                                             matlab_command_more)
 
         command_parts = self._build_command(matlab_command)
         result = subprocess.run(command_parts, stdout=subprocess.PIPE)
@@ -102,12 +107,17 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
         MatLab._parse_output(res, output_file, centroids_file)
         unlink(temp_file)
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         temp_file = self._dump_data_on_clean_csv(data_without_target)
 
-        matlab_command = "kmeans(csvread('{}'), {})".format(temp_file, str(nb_clusters))
+        matlab_command_more = ''
+        if nb_iterations is not None:
+            matlab_command_more = ', MaxIter, {}'.format(nb_iterations)
+
+        matlab_command = "kmeans(csvread('{}'), {}{})".format(temp_file, str(nb_clusters), matlab_command_more)
 
         command_parts = self._build_command(matlab_command)
         result = subprocess.run(command_parts, stdout=subprocess.PIPE)
