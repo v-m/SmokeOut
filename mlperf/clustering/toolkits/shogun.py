@@ -93,7 +93,7 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
 
     @NotImplementedError
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
-        output_file = self._prepare_files(dataset_name, run_info, False)
+        output_file, = self._prepare_files(dataset_name, run_info, False)
 
         train_features = shogun.RealFeatures(data_without_target.values.astype("float64").transpose())
         # distance metric over feature matrix - Euclidean distance
@@ -108,7 +108,7 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
 
     @NotImplementedError
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
-        output_file = self._prepare_files(dataset_name, run_info, False)
+        output_file, = self._prepare_files(dataset_name, run_info, False)
 
         train_features = shogun.RealFeatures(data_without_target.values.astype("float64").transpose())
         # distance metric over feature matrix - Euclidean distance

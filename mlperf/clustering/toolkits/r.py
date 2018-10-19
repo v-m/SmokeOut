@@ -120,7 +120,7 @@ class R(clusteringtoolkit.ClusteringToolkit):
         return output_file, {"centroids": centroids_file}
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
-        output_file = self._prepare_files(dataset_name, run_info, False)
+        output_file, = self._prepare_files(dataset_name, run_info, False)
 
         r_script = self._build_hierarchical(src_file, output_file, self.seed)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)

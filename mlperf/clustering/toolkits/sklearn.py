@@ -88,7 +88,7 @@ class SklearnCustomTolerance(Sklearn):
 
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
-        output_file = self._prepare_files(dataset_name, run_info, False)
+        output_file, = self._prepare_files(dataset_name, run_info, False)
 
         params = {'n_components': nb_clusters}
         if self.tolerance is not None:
@@ -127,7 +127,7 @@ class SklearnVanilla(SklearnCustomTolerance):
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
-        output_file = self._prepare_files(dataset_name, run_info, False)
+        output_file, = self._prepare_files(dataset_name, run_info, False)
 
         built_model = sklearn.cluster.AgglomerativeClustering(n_clusters=nb_clusters)
         built_model.fit(data_without_target)
@@ -151,7 +151,7 @@ class SklearnVanilla(SklearnCustomTolerance):
 
     def run_spectral(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
-        output_file = self._prepare_files(dataset_name, run_info, False)
+        output_file, = self._prepare_files(dataset_name, run_info, False)
 
         check = False
 
@@ -171,7 +171,7 @@ class SklearnVanilla(SklearnCustomTolerance):
 
     def run_dbscan(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
-        output_file = self._prepare_files(dataset_name, run_info, False)
+        output_file, = self._prepare_files(dataset_name, run_info, False)
 
         eps_value = 0.33 * run_number
         sample_value = run_number % 10
@@ -186,7 +186,7 @@ class SklearnVanilla(SklearnCustomTolerance):
 
     def run_ap(self, data_without_target, src_file, dataset_name, run_number, run_info=None):
         self._init()
-        output_file = self._prepare_files(dataset_name, run_info, False)
+        output_file, = self._prepare_files(dataset_name, run_info, False)
 
         damping_value = 0.016 * run_number + 0.5
         built_model = sklearn.cluster.AffinityPropagation(damping=damping_value)

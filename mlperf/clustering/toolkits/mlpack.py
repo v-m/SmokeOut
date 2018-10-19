@@ -81,7 +81,7 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
         return output_file, {"centroids": centroids_file}
 
     def run_meanshift(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
-        output_file = self._prepare_files(dataset_name, run_info, False)
+        output_file, = self._prepare_files(dataset_name, run_info, False)
 
         temp_file = ClusteringToolkit._dump_data_on_clean_csv(data_without_target)
         temp_file2 = ClusteringToolkit.create_temporary_file()
