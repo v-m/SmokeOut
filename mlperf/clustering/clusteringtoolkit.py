@@ -20,12 +20,17 @@ class ClusteringToolkit:
     """This class contains all functions and needed abstract methods to run a toolkit
     For adding a new algorithm, a new run_[algo_name](...) method should be added"""
 
-    def __init__(self):
+    def __init__(self, seed=None):
         self.overwrite_ran_iterations = False
+        self.seed = seed
 
-    def set_overwrite_ran_iterations(self, value):
+    def set_overwrite_ran_iterations(self, new_value):
         """Set to true to not skip already ran clusterings"""
-        self.overwrite_ran_iterations = value
+        self.overwrite_ran_iterations = new_value
+
+    def set_seed(self, new_seed):
+        """Set the specified seed for next executions"""
+        self.seed = new_seed
 
     @NotImplementedError
     def toolkit_name(self):

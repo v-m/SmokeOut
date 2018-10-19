@@ -2,7 +2,6 @@
 
 __author__ = "Vincenzo Musco (http://www.vmusco.com)"
 
-import tensorflow as tf
 from numpy.core.tests.test_mem_overlap import xrange
 from tensorflow.python.framework import constant_op
 
@@ -51,11 +50,15 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
     # https://www.tensorflow.org/api_docs/python/tf/contrib/factorization/KMeansClustering
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
+        import tensorflow as tf
+
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
+
+        if self.seed is not None:
+            tf.set_random_seed(self.seed)
 
         kmeans = tf.contrib.factorization.KMeansClustering(num_clusters=nb_clusters,
                                                            initial_clusters=initial_clusters, use_mini_batch=False)
-
         points, input_fn = TensorFlow._build_points_and_input_fn(data_without_target)
         TensorFlow._train_kpp(input_fn, kmeans, 10 if nb_iterations is None else nb_iterations)
         cluster_indices = list(kmeans.predict_cluster_index(input_fn))
@@ -65,7 +68,12 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
 
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
+        import tensorflow as tf
+
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
+
+        if self.seed is not None:
+            tf.set_random_seed(self.seed)
 
         kmeans = tf.contrib.factorization.KMeansClustering(num_clusters=nb_clusters, use_mini_batch=False)
 
@@ -76,7 +84,13 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
         ClusteringToolkit._save_centroids(TensorFlow._centroids_to_list(kmeans), centroids_file)
 
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
+        import tensorflow as tf
+
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
+
+        if self.seed is not None:
+            tf.set_random_seed(self.seed)
+
         points = data_without_target.values
 
         def get_input_fn():
@@ -94,7 +108,13 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
 
     def run_gaussian_initial_starting_points(self, nb_clusters, src_file, data_without_target, dataset_name,
                                             initial_clusters_file, initial_clusters, run_number, run_info=None):
+        import tensorflow as tf
+
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
+
+        if self.seed is not None:
+            tf.set_random_seed(self.seed)
+
         points = data_without_target.values
 
         def get_input_fn():

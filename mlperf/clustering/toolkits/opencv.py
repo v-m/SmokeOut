@@ -11,6 +11,12 @@ from mlperf.tools.static import OPENCV_ALGO
 
 
 class OpenCV(clusteringtoolkit.ClusteringToolkit):
+    def __init__(self):
+        """
+        OpenCV exposes any seed parameter
+        """
+        super().__init__(None)
+
     def toolkit_name(self):
         return OPENCV_ALGO
 
@@ -33,15 +39,13 @@ class OpenCV(clusteringtoolkit.ClusteringToolkit):
         ClusteringToolkit._save_clustering(OpenCV._clustering_to_list(data_without_target, ret[1]), output_file)
         ClusteringToolkit._save_centroids(OpenCV._centroids_to_list(ret[2]), centroids_file)
 
-    def __init__(self):
-        super().__init__()
-
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         # Define criteria = ( type, max_iter = 10 , epsilon = 1.0 )
-        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100 if nb_iterations is None else nb_iterations, 0.0)
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100 if nb_iterations is None else nb_iterations,
+                    0.0)
 
         ret = cv2.kmeans(np.float32(data_without_target.values), nb_clusters, None, criteria, 10,
                          flags=cv2.KMEANS_PP_CENTERS)
@@ -52,7 +56,8 @@ class OpenCV(clusteringtoolkit.ClusteringToolkit):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         # Define criteria = ( type, max_iter = 10 , epsilon = 1.0 )
-        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100 if nb_iterations is None else nb_iterations, 0.0)
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100 if nb_iterations is None else nb_iterations,
+                    0.0)
 
         ret = cv2.kmeans(np.float32(data_without_target.values), nb_clusters, initial_clusters, criteria, 10,
                          flags=cv2.KMEANS_USE_INITIAL_LABELS)

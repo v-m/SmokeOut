@@ -60,26 +60,25 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
                     result_file.write("{},{}\n".format(i, matches.group(1)))
                     i += 1
 
+    def _build_base_command(self, command):
+        seed_setup_command = "'shuffle'" if self.seed is None else "{}".format(self.seed)
+        return [MATLAB_EXE, "-nodisplay", "-nosplash", "-nodesktop",
+                "-r \"rng({}); {} exit;\"   ".format(MatLab._matlab_redirect_temp_folder(TEMPFOLDER),
+                                                     seed_setup_command, command)]
 
-    @staticmethod
-    def _build_command(command):
+    def _build_command(self, command):
         """
         Build a matlab command with needed flags for a proper run
         :param command: The base command to execute
         """
-        return [MATLAB_EXE, "-nodisplay", "-nosplash", "-nodesktop",
-                "-r \"rng('shuffle'); {}[idx,C] = {}; disp(idx); disp('===C==='); disp(num2str(C)); exit;\"   ".format(
-                    MatLab._matlab_redirect_temp_folder(TEMPFOLDER), command)]
+        return self._build_base_command("[idx,C] = {}; disp(idx); disp('===C==='); disp(num2str(C));".format(command))
 
-    @staticmethod
-    def _build_command_without_centroids(command):
+    def _build_command_without_centroids(self, command):
         """
         Build a matlab command with needed flags for a proper run. Do not print any centroid info.
         :param command: The base command to execute
         """
-        return [MATLAB_EXE, "-nodisplay", "-nosplash", "-nodesktop",
-                "-r \"rng('shuffle'); {}idx = {}; disp(idx); exit;\"   ".format(
-                    MatLab._matlab_redirect_temp_folder(TEMPFOLDER), command)]
+        return self._build_base_command("idx = {}; disp(idx);".format(command))
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
@@ -131,7 +130,7 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
 
         temp_file = ClusteringToolkit._dump_data_on_clean_csv(data_without_target)
         matlab_command = "cluster(linkage(csvread('{}'), 'ward'),'Maxclust',{})".format(temp_file, str(nb_clusters))
-        command_parts = MatLab._build_command_without_centroids(matlab_command)
+        command_parts = self._build_command_without_centroids(matlab_command)
 
         result = subprocess.run(command_parts, stdout=subprocess.PIPE)
         res = result.stdout
@@ -144,7 +143,7 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
 
         matlab_command = "cluster(fitgmdist(csvread('{}'),{},'RegularizationValue',0.1), csvread('{}'))"\
             .format(temp_file, str(nb_clusters), temp_file)
-        command_parts = MatLab._build_command_without_centroids(matlab_command)
+        command_parts = self._build_command_without_centroids(matlab_command)
         result = subprocess.run(command_parts, stdout=subprocess.PIPE)
         res = result.stdout
         MatLab._parse_output_without_centroids(res, output_file)

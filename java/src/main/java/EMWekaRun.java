@@ -22,7 +22,16 @@ public class EMWekaRun {
         loader.setSource(new GZIPInputStream(new FileInputStream(args[0])));
 
         EM model = new EM();
-        model.setSeed((int) (System.currentTimeMillis()/1000));
+        if(args.length > 2){
+            String[] argsParts = args[2].split(";");
+            for(String part : argsParts) {
+                String[] subparts = part.split("=");
+
+                if(subparts[0].equals("seed")) {
+                    model.setSeed(Integer.parseInt(subparts[1]));
+                }
+            }
+        }
 
         // This is the important parameter to set
         Instances dataset = loader.getDataSet();

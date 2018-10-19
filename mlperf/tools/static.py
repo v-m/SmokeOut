@@ -1,5 +1,7 @@
-#
-# Author: Vincenzo Musco (http://www.vmusco.com)
+"""Constants"""
+
+__author__ = "Vincenzo Musco (http://www.vmusco.com)"
+
 from mlperf import get_data
 
 # TOOLKITS CONSTANTS

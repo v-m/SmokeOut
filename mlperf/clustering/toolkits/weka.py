@@ -36,6 +36,9 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
         if nb_iterations is not None:
             weka_rest.append("nbiter={}".format(nb_iterations))
 
+        if self.seed is not None:
+            weka_rest.append("seed={}".format(self.seed))
+
         command_parts = [JAVA_EXE, "-classpath", JAVA_CLASSPATH, "WekaRun", src_file, output_file, centroids_file]
 
         if len(weka_rest) > 0:
@@ -45,12 +48,22 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)
+        # No seed or parameters for hierarchical
         command_parts = [JAVA_EXE, "-Xmx100g", "-classpath", JAVA_CLASSPATH, "HierarchicalWekaRun", src_file, output_file]
         subprocess.call(command_parts)
 
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)
+
+        weka_rest = []
+        if self.seed is not None:
+            weka_rest.append("seed={}".format(self.seed))
+
         command_parts = [JAVA_EXE, "-Xmx100g", "-classpath", JAVA_CLASSPATH, "EMWekaRun", src_file, output_file]
+
+        if len(weka_rest) > 0:
+            command_parts.append(";".join(weka_rest))
+
         subprocess.call(command_parts)
 
 

@@ -3,6 +3,8 @@
 __author__ = "Vincenzo Musco (http://www.vmusco.com)"
 
 import shogun
+import random
+import numpy as np
 
 from mlperf.clustering import clusteringtoolkit
 from mlperf.clustering.clusteringtoolkit import ClusteringToolkit
@@ -12,6 +14,11 @@ from mlperf.tools.static import SHOGUN_ALGO
 class Shogun(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
         return SHOGUN_ALGO
+
+    def _init(self):
+        if self.seed is not None:
+            random.seed(self.seed)
+            np.random.seed(self.seed)
 
     @staticmethod
     def _clustering_to_list(data_without_target, model):
@@ -40,6 +47,7 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
 
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
+        self._init()
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         train_features = shogun.RealFeatures(data_without_target.values.astype("float64").transpose())
@@ -60,6 +68,7 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
+        self._init()
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         train_features = shogun.RealFeatures(data_without_target.values.astype("float64").transpose())

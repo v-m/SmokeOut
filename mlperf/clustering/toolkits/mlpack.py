@@ -47,6 +47,8 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
 
         if nb_iterations is not None:
             command_parts.extend(['-m', '{}'.format(nb_iterations)])
+        if self.seed is not None:
+            command_parts.extend(['-s', '{}'.format(self.seed)])
 
         subprocess.call(command_parts)
 
@@ -65,6 +67,8 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
 
         if nb_iterations is not None:
             command_parts.extend(['-m', '{}'.format(nb_iterations)])
+        if self.seed is not None:
+            command_parts.extend(['-s', '{}'.format(self.seed)])
 
         subprocess.call(command_parts)
 

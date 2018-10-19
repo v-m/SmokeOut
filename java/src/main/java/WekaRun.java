@@ -23,7 +23,6 @@ public class WekaRun {
         loader.setSource(new GZIPInputStream(new FileInputStream(args[0])));
 
         SimpleKMeans kmeans = new SimpleKMeans();
-        kmeans.setSeed(1);
 
         // This is the important parameter to set
         kmeans.setPreserveInstancesOrder(true);
@@ -40,6 +39,8 @@ public class WekaRun {
                     EuclideanDistance dist = new EuclideanDistance();
                     dist.setDontNormalize(true);
                     kmeans.setDistanceFunction(dist);
+                }else if(subparts[0].equals("seed")) {
+                    kmeans.setSeed(Integer.parseInt(subparts[1]));
                 }
             }
         }
