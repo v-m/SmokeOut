@@ -15,7 +15,7 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
         return TENSORFLOW_ALGO
 
     @staticmethod
-    def _train_kpp(input_fn, kmeans, iterations = 10):
+    def _train_kpp(input_fn, kmeans, iterations=10):
         # train
         num_iterations = 10
         previous_centers = None
@@ -30,7 +30,6 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
             return tf.train.limit_epochs(tf.convert_to_tensor(points, dtype=tf.float32), num_epochs=1)
 
         return points, input_fn
-
 
     @staticmethod
     def _clustering_to_list(points, cluster_indices):
@@ -65,6 +64,7 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
         ClusteringToolkit._save_clustering(TensorFlow._clustering_to_list(points, cluster_indices), output_file)
         ClusteringToolkit._save_centroids(TensorFlow._centroids_to_list(kmeans), centroids_file)
 
+        return output_file, {"centroids": centroids_file}
 
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
@@ -82,6 +82,8 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
         cluster_indices = list(kmeans.predict_cluster_index(input_fn))
         ClusteringToolkit._save_clustering(TensorFlow._clustering_to_list(points, cluster_indices), output_file)
         ClusteringToolkit._save_centroids(TensorFlow._centroids_to_list(kmeans), centroids_file)
+
+        return output_file, {"centroids": centroids_file}
 
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         import tensorflow as tf
@@ -106,8 +108,10 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
         ClusteringToolkit._save_clustering(TensorFlow._clustering_to_list(points, cluster_indices), output_file)
         ClusteringToolkit._save_centroids(TensorFlow._centroids_to_list(gmm), centroids_file)
 
+        return output_file, {"centroids": centroids_file}
+
     def run_gaussian_initial_starting_points(self, nb_clusters, src_file, data_without_target, dataset_name,
-                                            initial_clusters_file, initial_clusters, run_number, run_info=None):
+                                             initial_clusters_file, initial_clusters, run_number, run_info=None):
         import tensorflow as tf
 
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
@@ -129,3 +133,5 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
         cluster_indices = list(gmm.predict_assignments())
         ClusteringToolkit._save_clustering(TensorFlow._clustering_to_list(points, cluster_indices), output_file)
         ClusteringToolkit._save_centroids(TensorFlow._centroids_to_list(gmm), centroids_file)
+
+        return output_file, {"centroids": centroids_file}

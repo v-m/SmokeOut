@@ -66,6 +66,8 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
         ClusteringToolkit._save_clustering(Shogun._clustering_to_list(data_without_target, result), output_file)
         ClusteringToolkit._save_centroids(Shogun._centroids_to_list(centers), centroids_file)
 
+        return output_file, {"centroids": centroids_file}
+
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
         self._init()
@@ -86,6 +88,8 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
         centers, result = Shogun._kmeans_process(kmeans)
         ClusteringToolkit._save_clustering(Shogun._clustering_to_list(data_without_target, result), output_file)
         ClusteringToolkit._save_centroids(Shogun._centroids_to_list(centers), centroids_file)
+
+        return output_file, {"centroids": centroids_file}
 
     @NotImplementedError
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
@@ -115,3 +119,4 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
         gmm.train_em()
 
         print(gmm)
+

@@ -63,6 +63,8 @@ class SklearnCustomTolerance(Sklearn):
                                            output_file)
         ClusteringToolkit._save_centroids(self._centroids_to_list(sklearn_kmean_model), centroids_file)
 
+        return output_file, {"centroids": centroids_file}
+
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
         self._init()
@@ -82,6 +84,8 @@ class SklearnCustomTolerance(Sklearn):
                                            output_file)
         ClusteringToolkit._save_centroids(self._centroids_to_list(sklearn_kmean_model), centroids_file)
 
+        return output_file, {"centroids": centroids_file}
+
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
         output_file = self._prepare_files(dataset_name, run_info, False)
@@ -96,6 +100,8 @@ class SklearnCustomTolerance(Sklearn):
         predicted_labels = built_model.predict(data_without_target)
         self._save_clustering(self._clustering_to_list(data_without_target, predicted_labels), output_file)
 
+        return output_file, {}
+
 
 class SklearnVanilla(SklearnCustomTolerance):
     """Sklearn with default tolerance"""
@@ -108,16 +114,16 @@ class SklearnVanilla(SklearnCustomTolerance):
 
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
-        super().run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number,
-                                     nb_iterations)
+        return super().run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                                            nb_iterations)
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
-        super().run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
-                           initial_clusters, run_number, run_info, nb_iterations)
+        return super().run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
+                                  initial_clusters, run_number, run_info, nb_iterations)
 
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
-        super().run_gaussian(nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info)
+        return super().run_gaussian(nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info)
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
@@ -127,6 +133,8 @@ class SklearnVanilla(SklearnCustomTolerance):
         built_model.fit(data_without_target)
 
         self._save_clustering(self._clustering_to_list(data_without_target, built_model.labels_), output_file)
+
+        return output_file, {}
 
     def run_meanshift(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
@@ -138,6 +146,8 @@ class SklearnVanilla(SklearnCustomTolerance):
 
         self._save_clustering(self._clustering_to_list(data_without_target, model.labels_), output_file)
         ClusteringToolkit._save_centroids(self._centroids_to_list(model), centroids_file)
+
+        return output_file, {"centroids": centroids_file}
 
     def run_spectral(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
@@ -157,6 +167,8 @@ class SklearnVanilla(SklearnCustomTolerance):
 
             self._save_clustering(self._clustering_to_list(data_without_target, built_model.labels_), output_file)
 
+        return output_file, {}
+
     def run_dbscan(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
         output_file = self._prepare_files(dataset_name, run_info, False)
@@ -170,6 +182,8 @@ class SklearnVanilla(SklearnCustomTolerance):
 
         self._save_clustering(self._clustering_to_list(data_without_target, built_model.labels_), output_file)
 
+        return output_file, {}
+
     def run_ap(self, data_without_target, src_file, dataset_name, run_number, run_info=None):
         self._init()
         output_file = self._prepare_files(dataset_name, run_info, False)
@@ -180,9 +194,11 @@ class SklearnVanilla(SklearnCustomTolerance):
 
         self._save_clustering(self._clustering_to_list(data_without_target, built_model.labels_), output_file)
 
+        return output_file, {}
+
 
 class SklearnFast(Sklearn):
     def toolkit_name(self):
         return SKLEARN__FAST_ALGO
 
-    #TODO ?!
+    # TODO ?!

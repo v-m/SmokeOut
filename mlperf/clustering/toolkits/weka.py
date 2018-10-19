@@ -45,12 +45,15 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
             command_parts.append(";".join(weka_rest))
 
         subprocess.call(command_parts)
+        return output_file, {"centroids": centroids_file}
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)
         # No seed or parameters for hierarchical
         command_parts = [JAVA_EXE, "-Xmx100g", "-classpath", JAVA_CLASSPATH, "HierarchicalWekaRun", src_file, output_file]
         subprocess.call(command_parts)
+
+        return output_file, {}
 
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)
@@ -65,6 +68,8 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
             command_parts.append(";".join(weka_rest))
 
         subprocess.call(command_parts)
+
+        return output_file, {}
 
 
 class WekaUnorm(Weka):

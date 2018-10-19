@@ -14,6 +14,7 @@ import pandas
 if not path.exists(R_BIN):
     raise FileNotFoundError("Unable to locate R binary")
 
+
 class R(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
         return R_ALGO
@@ -93,6 +94,8 @@ class R(clusteringtoolkit.ClusteringToolkit):
         dta = pandas.read_csv(centroids_file)
         dta.drop(dta.columns[[0]], axis=1).to_csv(centroids_file, index=False, header=False)
 
+        return output_file, {"centroids": centroids_file}
+
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
@@ -104,7 +107,7 @@ class R(clusteringtoolkit.ClusteringToolkit):
         dta = pandas.read_csv(centroids_file)
         dta.drop(dta.columns[[0]], axis=1).to_csv(centroids_file, index=False, header=False)
 
-    # TODO 100iter?
+        return output_file, {"centroids": centroids_file}
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)
@@ -112,3 +115,5 @@ class R(clusteringtoolkit.ClusteringToolkit):
         r_script = R._build_hierarchical(src_file, output_file, self.seed)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=r_script)
+
+        return output_file, {}

@@ -106,6 +106,8 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
         MatLab._parse_output(res, output_file, centroids_file)
         unlink(temp_file)
 
+        return output_file, {"centroids": centroids_file}
+
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
@@ -125,6 +127,8 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
         MatLab._parse_output(res, output_file, centroids_file)
         unlink(temp_file)
 
+        return output_file, {"centroids": centroids_file}
+
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)
 
@@ -137,6 +141,8 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
         MatLab._parse_output_without_centroids(res, output_file)
         unlink(temp_file)
 
+        return output_file, {}
+
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)
         temp_file = ClusteringToolkit._dump_data_on_clean_csv(data_without_target)
@@ -148,3 +154,5 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
         res = result.stdout
         MatLab._parse_output_without_centroids(res, output_file)
         unlink(temp_file)
+
+        return output_file, {}

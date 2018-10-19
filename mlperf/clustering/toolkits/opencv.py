@@ -51,6 +51,8 @@ class OpenCV(clusteringtoolkit.ClusteringToolkit):
                          flags=cv2.KMEANS_PP_CENTERS)
         OpenCV._save_run(ret, data_without_target, output_file, centroids_file)
 
+        return output_file, {"centroids": centroids_file}
+
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
@@ -62,3 +64,5 @@ class OpenCV(clusteringtoolkit.ClusteringToolkit):
         ret = cv2.kmeans(np.float32(data_without_target.values), nb_clusters, initial_clusters, criteria, 10,
                          flags=cv2.KMEANS_USE_INITIAL_LABELS)
         OpenCV._save_run(ret, data_without_target, output_file, centroids_file)
+
+        return output_file, {"centroids": centroids_file}
