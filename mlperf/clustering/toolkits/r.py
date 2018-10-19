@@ -61,20 +61,22 @@ class R(clusteringtoolkit.ClusteringToolkit):
         script_parts = []
 
         if seed is not None:
-            script_parts.append('''library(cluster)'''.format(seed))
+            script_parts.append('''set.seed({})'''.format(seed))
+
+        script_parts.append('''library(cluster);'''.format(seed))
 
         script_parts.append('''source_file=gzfile("{}");'''.format(src_file))
-        script_parts.append('''dat=read.csv(source_file, header=T, sep='\t')''')
+        script_parts.append('''dat=read.csv(source_file, header=T, sep='\t');''')
 
         # Let's remove the target feature
-        script_parts.append('''clustersNumber = nrow(unique(dat["target"]))''')
-        script_parts.append('''datWithoutTarget = subset( dat, select = -target )''')
+        script_parts.append('''clustersNumber = nrow(unique(dat["target"]));''')
+        script_parts.append('''datWithoutTarget = subset( dat, select = -target );''')
 
-        script_parts.append('''d <- dist(datWithoutTarget, method = "euclidean")''')
-        script_parts.append('''hc1 <- hclust(d, method = "ward.D2" )''')
-        script_parts.append('''sub_grp <- cutree(hc1, k = clustersNumber)''')
+        script_parts.append('''d <- dist(datWithoutTarget, method = "euclidean");''')
+        script_parts.append('''hc1 <- hclust(d, method = "ward.D2" );''')
+        script_parts.append('''sub_grp <- cutree(hc1, k = clustersNumber);''')
 
-        script_parts.append('''write.csv(clusteringResult["cluster"], file='{}')'''.format(dst_clusters))
+        script_parts.append('''write.csv(clusteringResult["cluster"], file='{}');'''.format(dst_clusters))
 
         return "\n".join(script_parts).encode()
 
@@ -90,6 +92,9 @@ class R(clusteringtoolkit.ClusteringToolkit):
                                           self.seed)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=r_script)
+
+        if self.debug:
+            print(r_script)
 
         dta = pandas.read_csv(centroids_file)
         dta.drop(dta.columns[[0]], axis=1).to_csv(centroids_file, index=False, header=False)
