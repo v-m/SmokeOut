@@ -30,6 +30,14 @@ class DatasetFacts():
     def data_without_target(self):
         return self.data.loc[:, self.data.columns != 'target']
 
+    def nb_instances(self):
+        """number of instances"""
+        return self.data.shape[0]
+
+    def nb_features(self):
+        """number of features (excluding target)"""
+        return self.data.shape[1] - 1
+
     @staticmethod
     def read_dataset(source_file):
         print("Reading file {}...".format(source_file))
