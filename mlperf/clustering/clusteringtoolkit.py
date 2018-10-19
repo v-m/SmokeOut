@@ -23,10 +23,14 @@ class ClusteringToolkit:
     def __init__(self, seed=None):
         self.overwrite_ran_iterations = False
         self.seed = seed
+        self.redirect_output_files = None
 
     def set_overwrite_ran_iterations(self, new_value):
         """Set to true to not skip already ran clusterings"""
         self.overwrite_ran_iterations = new_value
+
+    def set_redirect_output_path(self, new_path):
+        self.redirect_output_files = new_path
 
     def set_seed(self, new_seed):
         """Set the specified seed for next executions"""
@@ -44,8 +48,13 @@ class ClusteringToolkit:
                                                               ext, run_info)
 
     def _prepare_files(self, dataset_name, run_info, centroids=False):
-        output_file = self._dataset_out_file_name(dataset_name, run_info=run_info)
-        centroids_file = self._centroid_out_file_name(dataset_name, run_info=run_info)
+        dataset_out_name = dataset_name
+        if self.redirect_output_files is not None:
+            base_name = os.path.basename(dataset_name)
+            dataset_out_name = os.path.join(self.redirect_output_files, base_name)
+
+        output_file = self._dataset_out_file_name(dataset_out_name, run_info=run_info)
+        centroids_file = self._centroid_out_file_name(dataset_out_name, run_info=run_info)
 
         if not self.overwrite_ran_iterations:
             if os.path.exists(output_file) and (not centroids or os.path.exists(centroids_file)):

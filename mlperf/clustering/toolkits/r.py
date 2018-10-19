@@ -12,7 +12,7 @@ import pandas
 
 # Checking requirements on import
 if not path.exists(R_BIN):
-    raise FileNotFoundError("Unable to locate RScript binary")
+    raise FileNotFoundError("Unable to locate R binary")
 
 class R(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):

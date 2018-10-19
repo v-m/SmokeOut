@@ -12,7 +12,7 @@ import mlperf.clustering.toolkits
 import inspect
 
 from mlperf.clustering.clusteringtoolkit import AlreadyRanException
-from mlperf.clustering.tools import draw_centroids, run_for_nr
+from mlperf.clustering.tools import read_or_draw_centroids, run_for_nr, read_dataset
 
 
 def configure_arg_parse_optionals(parser, enforce_dataset_check=False):
@@ -129,9 +129,9 @@ else:
 
 for datasets in fulldatasets:
     data = None
-    groundTruthClustersId = None
-    clustersNumber = None
-    dataLessTarget = None
+    ground_truth_cluster_ids = None
+    number_clusters = None
+    data_without_target = None
 
     for runid in range(args.runs):
         resolved_run_nr = args.base + runid
@@ -140,23 +140,29 @@ for datasets in fulldatasets:
         print("RUN: {}".format(RUN_INFO))
         print("*****")
         for dataset in datasets:
-            srcFile = dataset
+            source_file = dataset
 
             if data is None or not reuse:
-                print("Reading file {}...".format(srcFile))
+                print("Reading file {}...".format(source_file))
                 # data = pandas.read_csv(srcFile, sep='\t')
                 # data = dd.read_csv(srcFile, sep='\t')
+                dataset_infos = read_dataset(source_file)
 
-                chunksize = 100000
-                text_file_reader = pandas.read_csv(srcFile, sep='\t', chunksize=chunksize, iterator=True)
-                data = pandas.concat(text_file_reader, ignore_index=True)
+                # chunksize = 100000
+                # text_file_reader = pandas.read_csv(source_file, sep='\t', chunksize=chunksize, iterator=True)
+                # data = pandas.concat(text_file_reader, ignore_index=True)
+                data = dataset_infos['data']
+                number_clusters = dataset_infos['number_clusters']
+                data_without_target = dataset_infos['data_without_target']
+                ground_truth_cluster_ids = dataset_infos['ground_truth_cluster_ids']
 
-                print("Analyzing file...")
-                groundTruthClustersId = data.target.unique()
-                clustersNumber = len(groundTruthClustersId)
-                print("#clusters = {}".format(clustersNumber))
+                # print("Analyzing file...")
+                # ground_truth_cluster_ids = data.target.unique()
 
-                dataLessTarget = data.loc[:, data.columns != 'target']
+                # number_clusters = len(ground_truth_cluster_ids)
+                # print("#clusters = {}".format(number_clusters))
+
+                # data_without_target = data.loc[:, data.columns != 'target']
             else:
                 print("Reusing previously loaded information...")
 
@@ -164,15 +170,16 @@ for datasets in fulldatasets:
             try:
                 if algorithm == 'ap':
                     # AP Cluster does not expect a #clusters
-                    function_instance(srcFile, dataLessTarget, dataset, resolved_run_nr, RUN_INFO)
+                    function_instance(source_file, data_without_target, dataset, resolved_run_nr, RUN_INFO)
                     pass
                 elif algorithm == 'kmeans':
                     # Kmeans requires centroid input !
-                    centroids_file, centroids = draw_centroids(srcFile, runid, groundTruthClustersId, data)
-                    function_instance(clustersNumber, srcFile, dataLessTarget, dataset, centroids_file, centroids,
-                                      resolved_run_nr, RUN_INFO)
+                    centroids_file, centroids = read_or_draw_centroids(source_file, runid, ground_truth_cluster_ids, data)
+                    function_instance(number_clusters, source_file, data_without_target, dataset, centroids_file,
+                                      centroids, resolved_run_nr, RUN_INFO)
                 else:
-                    function_instance(clustersNumber, srcFile, dataLessTarget, dataset, resolved_run_nr, RUN_INFO)
+                    function_instance(number_clusters, source_file, data_without_target, dataset, resolved_run_nr,
+                                      RUN_INFO)
             except Exception as e:
                 print("!!!!! Exception occured !!!!!")
                 print(sys.exc_info())
