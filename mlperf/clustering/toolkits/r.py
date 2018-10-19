@@ -19,8 +19,7 @@ class R(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
         return R_ALGO
 
-    @staticmethod
-    def _build_kmeans_script(src_file, dst_clusters, dst_centroids, init_clusters=None, max_iter=None, seed=None):
+    def _build_kmeans_script(self, src_file, dst_clusters, dst_centroids, init_clusters=None, max_iter=None, seed=None):
         script_parts = []
 
         if seed is not None:
@@ -54,10 +53,14 @@ class R(clusteringtoolkit.ClusteringToolkit):
         # [1] "cluster"      "centers"      "totss"        "withinss"     "tot.withinss"
         # [6] "betweenss"    "size"         "iter"         "ifault"
 
-        return "\n".join(script_parts).encode()
+        ret = "\n".join(script_parts).encode()
 
-    @staticmethod
-    def _build_hierarchical(src_file, dst_clusters, seed=None):
+        if self.debug:
+            print(ret)
+
+        return ret
+
+    def _build_hierarchical(self, src_file, dst_clusters, seed=None):
         script_parts = []
 
         if seed is not None:
@@ -78,7 +81,12 @@ class R(clusteringtoolkit.ClusteringToolkit):
 
         script_parts.append('''write.csv(clusteringResult["cluster"], file='{}');'''.format(dst_clusters))
 
-        return "\n".join(script_parts).encode()
+        ret = "\n".join(script_parts).encode()
+
+        if self.debug:
+            print(ret)
+
+        return ret
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
@@ -88,13 +96,10 @@ class R(clusteringtoolkit.ClusteringToolkit):
 
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
-        r_script = R._build_kmeans_script(src_file, output_file, centroids_file, initial_clusters_file, nb_iterations,
+        r_script = self._build_kmeans_script(src_file, output_file, centroids_file, initial_clusters_file, nb_iterations,
                                           self.seed)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=r_script)
-
-        if self.debug:
-            print(r_script)
 
         dta = pandas.read_csv(centroids_file)
         dta.drop(dta.columns[[0]], axis=1).to_csv(centroids_file, index=False, header=False)
@@ -105,7 +110,7 @@ class R(clusteringtoolkit.ClusteringToolkit):
                              nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
-        r_script = R._build_kmeans_script(src_file, output_file, centroids_file, None, nb_iterations, self.seed)
+        r_script = self._build_kmeans_script(src_file, output_file, centroids_file, None, nb_iterations, self.seed)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=r_script)
 
@@ -117,7 +122,7 @@ class R(clusteringtoolkit.ClusteringToolkit):
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file = self._prepare_files(dataset_name, run_info, False)
 
-        r_script = R._build_hierarchical(src_file, output_file, self.seed)
+        r_script = self._build_hierarchical(src_file, output_file, self.seed)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=r_script)
 

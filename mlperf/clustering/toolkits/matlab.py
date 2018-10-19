@@ -63,7 +63,7 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
     def _build_base_command(self, command):
         seed_setup_command = "'shuffle'" if self.seed is None else "{}".format(self.seed)
         return [MATLAB_EXE, "-nodisplay", "-nosplash", "-nodesktop",
-                "-r \"rng({}); {} exit;\"   ".format(MatLab._matlab_redirect_temp_folder(TEMPFOLDER),
+                "-r \"{}rng({}); {} exit;\"   ".format(MatLab._matlab_redirect_temp_folder(TEMPFOLDER),
                                                      seed_setup_command, command)]
 
     def _build_command(self, command):
@@ -71,14 +71,24 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
         Build a matlab command with needed flags for a proper run
         :param command: The base command to execute
         """
-        return self._build_base_command("[idx,C] = {}; disp(idx); disp('===C==='); disp(num2str(C));".format(command))
+        ret = self._build_base_command("[idx,C] = {}; disp(idx); disp('===C==='); disp(num2str(C));".format(command))
+
+        if self.debug:
+            print(ret)
+
+        return ret
 
     def _build_command_without_centroids(self, command):
         """
         Build a matlab command with needed flags for a proper run. Do not print any centroid info.
         :param command: The base command to execute
         """
-        return self._build_base_command("idx = {}; disp(idx);".format(command))
+        ret = self._build_base_command("idx = {}; disp(idx);".format(command))
+
+        if self.debug:
+            print(ret)
+
+        return ret
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
@@ -93,7 +103,7 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
 
         matlab_command_more = ''
         if nb_iterations is not None:
-            matlab_command_more = ', MaxIter, {}'.format(nb_iterations)
+            matlab_command_more = ", 'MaxIter', {}".format(nb_iterations)
 
         matlab_command = "kmeans(csvread('{}'), {}, 'Start', [{}]{})".format(temp_file, str(nb_clusters),
                                                                              initial_clusters_matlab_string_matrix,
