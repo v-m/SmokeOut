@@ -18,12 +18,15 @@ from mlperf.clustering.tools import read_or_draw_centroids, run_for_nr, read_dat
 def configure_arg_parse_optionals(parser, enforce_dataset_check=False):
     parser.add_argument('--base', '-b', type=int, action='append', help='Execute only RUN x', default=0)
     parser.add_argument('--runs', '-r', type=int, help='Number of runs to perform', default=30)
+    parser.add_argument('--infinite-runs', '-I', action='store_true', help='Number of runs to perform', default=False)
     parser.add_argument('--basepath-dataset', '-a', type=str,
                         help='Specify the absolute part of the path for dataset selection', default=None)
     parser.add_argument('--dataset', '-d', action='append', required=enforce_dataset_check,
                         help='Run this dataset tsv file', default=None)
     parser.add_argument('--overwrite', '-o', action='store_true',
                         help='If a specific run is already ran, recompute it anyway', default=False)
+    parser.add_argument('--output-path', '-f', type=str,
+                        help='Overwrite the default output folder (default is same as file)', default=None)
     parser.add_argument('--reuse', '-s', action='store_true',
                         help='If several dataset, perform all runs before going to the next dataset (no dataset interlacement).')
     parser.add_argument('--init', '-i', type=str,
@@ -102,6 +105,10 @@ if args.init:
 
 class_instance = candidate_class(**init)
 class_instance.set_overwrite_ran_iterations(args.overwrite)
+
+if args.output_path is not None:
+    class_instance.set_redirect_output_path(args.output_path)
+
 candidate_function = getattr(candidate_class, "run_{}".format(algorithm))
 function_instance = getattr(class_instance, "run_{}".format(algorithm))
 
@@ -133,7 +140,8 @@ for datasets in fulldatasets:
     number_clusters = None
     data_without_target = None
 
-    for runid in range(args.runs):
+    runid = 0
+    while args.infinite_runs or runid < args.runs:
         resolved_run_nr = args.base + runid
         RUN_INFO = run_for_nr(class_instance.toolkit_name(), resolved_run_nr)
         print("*****")
@@ -188,3 +196,4 @@ for datasets in fulldatasets:
             except AlreadyRanException as e:
                 print("Skipping...")
 
+        runid += 1
