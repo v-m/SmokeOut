@@ -1,35 +1,38 @@
 #!/usr/bin/env python
 
+"""Generate clustering using specific toolkit/algorithm and configuration"""
+
+__author__ = "Vincenzo Musco (http://www.vmusco.com)"
+__date__ = "Oct 23, 2018"
+
 import argparse
 import os
 import sys
 import importlib
 import traceback
 
-import pandas
-
 import mlperf.clustering.toolkits
 import inspect
 
 from mlperf.clustering.clusteringtoolkit import AlreadyRanException
-from mlperf.clustering.tools import read_or_draw_centroids, run_for_nr, read_dataset
+from mlperf.clustering.tools import read_or_draw_centroids, run_for_nr, DatasetFacts
 
 
 def configure_arg_parse_optionals(parser, enforce_dataset_check=False):
-    parser.add_argument('--base', '-b', type=int, action='append', help='Execute only RUN x', default=0)
-    parser.add_argument('--runs', '-r', type=int, help='Number of runs to perform', default=30)
-    parser.add_argument('--infinite-runs', '-I', action='store_true', help='Number of runs to perform', default=False)
-    parser.add_argument('--basepath-dataset', '-a', type=str,
+    parser.add_argument('-b', '--base', type=int, action='append', help='Execute only RUN x', default=0)
+    parser.add_argument('-r', '--runs', type=int, help='Number of runs to perform', default=30)
+    parser.add_argument('-I', '--infinite-runs', action='store_true', help='Number of runs to perform', default=False)
+    parser.add_argument('-a', '--basepath-dataset', type=str,
                         help='Specify the absolute part of the path for dataset selection', default=None)
-    parser.add_argument('--dataset', '-d', action='append', required=enforce_dataset_check,
+    parser.add_argument('-d', '--dataset', action='append', required=enforce_dataset_check,
                         help='Run this dataset tsv file', default=None)
-    parser.add_argument('--overwrite', '-o', action='store_true',
+    parser.add_argument('-o', '--overwrite', action='store_true',
                         help='If a specific run is already ran, recompute it anyway', default=False)
-    parser.add_argument('--output-path', '-f', type=str,
+    parser.add_argument('-f', '--output-path', type=str,
                         help='Overwrite the default output folder (default is same as file)', default=None)
-    parser.add_argument('--reuse', '-s', action='store_true',
+    parser.add_argument('-s', '--reuse', action='store_true',
                         help='If several dataset, perform all runs before going to the next dataset (no dataset interlacement).')
-    parser.add_argument('--init', '-i', type=str,
+    parser.add_argument('-i', '--init', type=str,
                         help='Parameters needed to initialize the toolkit/variant.')
 
 
@@ -119,7 +122,7 @@ if len(args.dataset) == 1:
     reuse = True
 
 print("Toolkit/Variant/Algorithm = {}/{}/{}".format(toolkit, variant, algorithm))
-print("Runs = {}".format(args.runs))
+print("Runs = {}".format(args.runs if not args.infinite_runs else "Infinite"))
 print("Dataset = {}".format(args.dataset))
 print("Base = {}".format(args.base))
 print("Reuse = {}".format(reuse))
@@ -151,26 +154,14 @@ for datasets in fulldatasets:
             source_file = dataset
 
             if data is None or not reuse:
-                print("Reading file {}...".format(source_file))
-                # data = pandas.read_csv(srcFile, sep='\t')
-                # data = dd.read_csv(srcFile, sep='\t')
-                dataset_infos = read_dataset(source_file)
+                # print("Reading file {}...".format(source_file))
+                df = DatasetFacts.read_dataset(source_file)
 
-                # chunksize = 100000
-                # text_file_reader = pandas.read_csv(source_file, sep='\t', chunksize=chunksize, iterator=True)
-                # data = pandas.concat(text_file_reader, ignore_index=True)
-                data = dataset_infos['data']
-                number_clusters = dataset_infos['number_clusters']
-                data_without_target = dataset_infos['data_without_target']
-                ground_truth_cluster_ids = dataset_infos['ground_truth_cluster_ids']
-
-                # print("Analyzing file...")
-                # ground_truth_cluster_ids = data.target.unique()
-
-                # number_clusters = len(ground_truth_cluster_ids)
-                # print("#clusters = {}".format(number_clusters))
-
-                # data_without_target = data.loc[:, data.columns != 'target']
+                data = df.data
+                number_clusters = df.nb_features()
+                ground_truth_cluster_ids = df.ground_truth_cluster_ids()
+                data_without_target = df.data_without_target()
+                print("Dataset stats (#features/#instances) =", number_clusters, df.nb_instances())
             else:
                 print("Reusing previously loaded information...")
 
@@ -188,6 +179,8 @@ for datasets in fulldatasets:
                 else:
                     function_instance(number_clusters, source_file, data_without_target, dataset, resolved_run_nr,
                                       RUN_INFO)
+
+
             except Exception as e:
                 print("!!!!! Exception occured !!!!!")
                 print(sys.exc_info())

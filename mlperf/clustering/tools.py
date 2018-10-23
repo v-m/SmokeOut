@@ -9,7 +9,7 @@ import pandas
 from mlperf.clustering.clusteringtoolkit import ClusteringToolkit
 
 
-class DatasetFacts():
+class DatasetFacts:
     """Object alternative to method read_dataset"""
     def __init__(self, data):
         self.data = data

@@ -25,6 +25,7 @@ class ClusteringToolkit:
         self.seed = seed
         self.redirect_output_files = None
         self.debug = False
+        self.temp_files = []
 
     def set_overwrite_ran_iterations(self, new_value):
         """Set to true to not skip already ran clusterings"""
@@ -107,9 +108,8 @@ class ClusteringToolkit:
     def _centroid_filename_for(algo_name):
         return "{}.centroids".format(algo_name)
 
-    @staticmethod
-    def _dump_data_on_clean_csv(data_without_target):
-        temp_file = ClusteringToolkit.create_temporary_file()
+    def _dump_data_on_clean_csv(self, data_without_target):
+        temp_file = self.create_temporary_file()
 
         fp = open(temp_file, "w")
         fp.write(data_without_target.to_csv(index=False, header=False))
@@ -117,9 +117,14 @@ class ClusteringToolkit:
 
         return temp_file
 
-    @staticmethod
-    def create_temporary_file():
-        return "{}/{}_{}.csv".format(TEMPFOLDER, int(time.time()), random.randint(1, 10000))
+    def create_temporary_file(self):
+        ret = "{}/{}_{}.csv".format(TEMPFOLDER, int(time.time()), random.randint(1, 10000))
+        self.temp_files.append(ret)
+        return ret
+
+    def clean_temporary_files(self):
+        for temp_file in self.temp_files:
+            os.unlink(temp_file)
 
     @NotImplementedError
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,

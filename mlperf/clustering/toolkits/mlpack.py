@@ -28,8 +28,8 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
         with open(input_file, 'r') as csv_file:
             with open(output_file, 'w') as resultFile:
                 i = 0
-                resultReader = csv.reader(csv_file)
-                for row in resultReader:
+                result_reader = csv.reader(csv_file)
+                for row in result_reader:
                     resultFile.write("{},{}\n".format(i, int(float(row[-1]))))
                     i += 1
 
@@ -39,7 +39,7 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
         temp_file = self._dump_data_on_clean_csv(data_without_target)
-        temp_file2 = "{}/{}b.csv".format(TEMPFOLDER, int(time.time()))
+        temp_file2 = self.create_temporary_file()
 
         # -a naive = Lloyd
         command_parts = ["{}/mlpack_kmeans".format(MLPACK_BIN), "--clusters", str(nb_clusters), "-i", temp_file, "-I",
@@ -53,8 +53,7 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
         subprocess.call(command_parts)
 
         self._save_mlpack_output(temp_file2, output_file)
-        unlink(temp_file)
-        unlink(temp_file2)
+        self.clean_temporary_files()
 
         return output_file, {"centroids": centroids_file}
 
@@ -62,7 +61,7 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
                              nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
         temp_file = self._dump_data_on_clean_csv(data_without_target)
-        temp_file2 = "{}/{}b.csv".format(TEMPFOLDER, int(time.time()))
+        temp_file2 = self.create_temporary_file()
 
         command_parts = ["{}/mlpack_kmeans".format(MLPACK_BIN), "--clusters", str(nb_clusters), "-i", temp_file, "-o",
                          temp_file2, "-a", "naive", "-C", centroids_file]
@@ -75,23 +74,20 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
         subprocess.call(command_parts)
 
         self._save_mlpack_output(temp_file2, output_file)
-        unlink(temp_file)
-        unlink(temp_file2)
+        self.clean_temporary_files()
 
         return output_file, {"centroids": centroids_file}
 
     def run_meanshift(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file, = self._prepare_files(dataset_name, run_info, False)
 
-        temp_file = ClusteringToolkit._dump_data_on_clean_csv(data_without_target)
-        temp_file2 = ClusteringToolkit.create_temporary_file()
+        temp_file = self._dump_data_on_clean_csv(data_without_target)
+        temp_file2 = self.create_temporary_file()
 
         command_parts = ["{}/mlpack_mean_shift".format(MLPACK_BIN), "-i", temp_file, "-o", temp_file2]
         subprocess.call(command_parts)
 
         self._save_mlpack_output(temp_file2, output_file)
-
-        unlink(temp_file)
-        unlink(temp_file2)
+        self.clean_temporary_files()
 
         return output_file, {}
