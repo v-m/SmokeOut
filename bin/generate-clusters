@@ -146,7 +146,7 @@ for datasets in fulldatasets:
     runid = 0
     while args.infinite_runs or runid < args.runs:
         resolved_run_nr = args.base + runid
-        RUN_INFO = run_for_nr(class_instance.toolkit_name(), resolved_run_nr)
+        RUN_INFO = run_for_nr(class_instance.toolkit_name(), algorithm, resolved_run_nr)
         print("*****")
         print("RUN: {}".format(RUN_INFO))
         print("*****")
