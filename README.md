@@ -11,7 +11,8 @@ This tool expect to get the binary path in two flavors:
     | --- | --- | --- |
     | `MLP_MLPACK_FOLDER` | The binary folder for mlpack installation |  |
     | `MLP_MATLAB_BIN` | The `matlab` binary | `matlab` |
-    | `MLP_R_BIN` | The `RScript` binary | `RScript` |
+    | `MLP_OCTAVE_BIN` | The `octave` binary | `octave` |
+    | `MLP_R_BIN` | The `R` binary | `R` |
     | `MLP_JAVA_BIN` | The `java` binary | `java` |
     | `MLP_TEMPFOLDER` | A temporary folder to work in | `/tmp` |
 

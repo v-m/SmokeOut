@@ -14,6 +14,7 @@ def initBinaryPath(bin_name, env_var_name):
 
 MLPACK_BIN = initBinaryPath("", "MLP_MLPACK_FOLDER")
 MATLAB_EXE = initBinaryPath('matlab', "MLP_MATLAB_BIN")
+OCTAVE_EXE = initBinaryPath('octave', "MLP_OCTAVE_BIN")
 R_BIN = initBinaryPath('R', "MLP_R_BIN")
 JAVA_EXE = initBinaryPath('java', "MLP_JAVA_BIN")
 TEMPFOLDER = os.environ["MLP_TEMPFOLDER"] if "MLP_TEMPFOLDER" in os.environ else '/tmp'

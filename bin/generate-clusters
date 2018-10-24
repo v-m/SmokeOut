@@ -51,16 +51,8 @@ configure_arg_parse_optionals(parser)
 args = parser.parse_args()
 toolkit = args.toolkit
 
-print("\nNow loading module {}".format(toolkit), file=sys.stderr)
-print("If any error arise now, please check that the toolkit is fully installed and working on this system\n".format(
-    toolkit), file=sys.stderr)
-try:
-    i = importlib.import_module("{}.{}".format(mlperf.clustering.toolkits.__package__, toolkit))
-    print("✔ Module {} loaded successfully.".format(toolkit), file=sys.stderr)
-except Exception as e:
-    print("⨯ Error importing module {}. Please check your system installation.".format(toolkit), file=sys.stderr)
-    print(e, file=sys.stderr)
-    sys.exit(1)
+i = importlib.import_module("{}.{}".format(mlperf.clustering.toolkits.__package__, toolkit))
+
 # print("=== ".format(toolkit), file=sys.stderr)
 
 ## Toolkit Variant
@@ -106,7 +98,16 @@ if args.init:
         init_key, init_value = init_option.split("=")
         init[init_key] = init_value
 
-class_instance = candidate_class(**init)
+print("Now loading module {}/{}...".format(toolkit,variant), file=sys.stderr)
+try:
+    class_instance = candidate_class(**init)
+    print("✔ Module {} loaded successfully.".format(toolkit), file=sys.stderr)
+except Exception as e:
+    print("⨯ Error importing module {}/{}. Please check your system installation.".format(toolkit, variant),
+          file=sys.stderr)
+    print("\t -> {}".format(e), file=sys.stderr)
+    sys.exit(1)
+
 class_instance.set_overwrite_ran_iterations(args.overwrite)
 
 if args.output_path is not None:
@@ -173,7 +174,8 @@ for datasets in fulldatasets:
                     pass
                 elif algorithm == 'kmeans':
                     # Kmeans requires centroid input !
-                    centroids_file, centroids = read_or_draw_centroids(source_file, runid, ground_truth_cluster_ids, data)
+                    centroids_file, centroids = read_or_draw_centroids(source_file, runid, number_clusters,
+                                                                       data_without_target, args.output_path)
                     function_instance(number_clusters, source_file, data_without_target, dataset, centroids_file,
                                       centroids, resolved_run_nr, RUN_INFO)
                 else:

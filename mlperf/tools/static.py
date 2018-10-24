@@ -6,6 +6,7 @@ from mlperf import get_data
 
 # TOOLKITS CONSTANTS
 MATLAB_ALGO = "matlab"
+OCTAVE_ALGO = "octave"
 WEKA_ALGO = "weka"
 WEKA_UNORM_ALGO = "weka_unorm"
 MLPACK_ALGO = "mlpack"

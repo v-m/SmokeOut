@@ -12,16 +12,16 @@ from mlperf.clustering.clusteringtoolkit import ClusteringToolkit
 from mlperf.tools.config import TEMPFOLDER, MLPACK_BIN
 from mlperf.tools.static import MLPACK_ALGO
 
-# Checking requirements on import
-binaries = ["{}/mlpack_kmeans".format(MLPACK_BIN), "{}/mlpack_mean_shift".format(MLPACK_BIN)]
-for binary in binaries:
-    if not path.exists(binary):
-        raise FileNotFoundError("Unable to locate mlpack installation directory")
-
 
 class MLPack(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
         return MLPACK_ALGO
+
+    def check_toolkit_requirements(self):
+        binaries = ["{}/mlpack_kmeans".format(MLPACK_BIN), "{}/mlpack_mean_shift".format(MLPACK_BIN)]
+        for binary in binaries:
+            if not path.exists(binary):
+                raise FileNotFoundError("Unable to locate mlpack installation directory")
 
     @staticmethod
     def _save_mlpack_output(input_file, output_file):

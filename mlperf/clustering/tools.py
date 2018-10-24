@@ -41,8 +41,6 @@ class DatasetFacts:
     @staticmethod
     def read_dataset(source_file):
         print("Reading file {}...".format(source_file))
-        # data = pandas.read_csv(srcFile, sep='\t')
-        # data = dd.read_csv(srcFile, sep='\t')
 
         chunksize = 100000
         text_file_reader = pandas.read_csv(source_file, sep='\t', chunksize=chunksize, iterator=True)
@@ -59,8 +57,6 @@ def run_for_nr(run_base, algorithm, run_id):
 
 def read_dataset(source_file):
     print("Reading file {}...".format(source_file))
-    # data = pandas.read_csv(srcFile, sep='\t')
-    # data = dd.read_csv(srcFile, sep='\t')
 
     chunksize = 100000
     text_file_reader = pandas.read_csv(source_file, sep='\t', chunksize=chunksize, iterator=True)
@@ -86,30 +82,8 @@ def read_centroids_file(drawn_clusters_file_path):
     return pandas.read_csv(drawn_clusters_file_path, header=None, dtype='float32').values
 
 
-def draw_centroids(ground_truth_clusters_id, data, drawn_clusters_file_path=None):
-    initial_clusters = list()
-
-    for i in ground_truth_clusters_id:
-        found = False
-        selected_sample = None
-
-        '''
-         In some dataset (eg. titanic) the random drawn cluster centroid may be the same in both clusters. To 
-            avoid this effect, we redrawn as long as there is a conflict...
-        '''
-        while not found:
-            selected_sample = data[data.target == i].sample(1)
-            selected_sample = selected_sample.loc[:, data.columns != 'target'].iloc[0].values
-
-            found = True
-
-            for anInitialClusterPreviouslyInserted in initial_clusters:
-                if False not in (selected_sample == anInitialClusterPreviouslyInserted):
-                    found = False
-                    break
-
-        initial_clusters.append(selected_sample)
-
+def draw_centroids(nb_clusters, data, drawn_clusters_file_path=None):
+    initial_clusters = data.sample(nb_clusters)
     initial_clusters = numpy.asarray(initial_clusters)
     if drawn_clusters_file_path:
         pandas.DataFrame(initial_clusters).to_csv(path_or_buf=drawn_clusters_file_path, index=False, header=False)
@@ -117,13 +91,17 @@ def draw_centroids(ground_truth_clusters_id, data, drawn_clusters_file_path=None
     return initial_clusters
 
 
-def read_or_draw_centroids(dataset_name, run_info, ground_truth_clusters_id, data):
+def read_or_draw_centroids(dataset_name, run_info, nb_clusters, data, redirect_output=None):
     drawn_clusters_file_path = ClusteringToolkit.dataset_out_file_name_static(dataset_name,
                                                                               "{}.init_set_clusters".format(run_info))
 
+    if redirect_output is not None:
+        base_name = os.path.basename(drawn_clusters_file_path)
+        drawn_clusters_file_path = os.path.join(redirect_output, base_name)
+
     if not os.path.exists(drawn_clusters_file_path):
         # Lets draw a random feature set on EACH feature (this will be the starting point for *ALL* algorithms)
-        initial_clusters = draw_centroids(ground_truth_clusters_id, data, drawn_clusters_file_path)
+        initial_clusters = draw_centroids(nb_clusters, data, drawn_clusters_file_path)
     else:
         # Reread to get float32 type (required by TF)
         initial_clusters = read_centroids_file(drawn_clusters_file_path)

@@ -10,14 +10,14 @@ from mlperf.tools.config import R_BIN
 from mlperf.tools.static import R_ALGO
 import pandas
 
-# Checking requirements on import
-if not path.exists(R_BIN):
-    raise FileNotFoundError("Unable to locate R binary")
-
 
 class R(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
         return R_ALGO
+
+    def check_toolkit_requirements(self):
+        if not path.exists(R_BIN):
+            raise FileNotFoundError("Unable to locate R binary")
 
     def _build_kmeans_script(self, src_file, dst_clusters, dst_centroids, init_clusters=None, max_iter=None, seed=None):
         script_parts = []
@@ -96,8 +96,9 @@ class R(clusteringtoolkit.ClusteringToolkit):
 
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
-        r_script = self._build_kmeans_script(src_file, output_file, centroids_file, initial_clusters_file, nb_iterations,
-                                          self.seed)
+        r_script = self._build_kmeans_script(src_file, output_file, centroids_file, initial_clusters_file,
+                                             nb_iterations,
+                                             self.seed)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=r_script)
 

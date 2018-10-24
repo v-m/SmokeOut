@@ -9,17 +9,18 @@ from mlperf.tools.config import JAVA_EXE
 from mlperf.tools.static import WEKA_ALGO, WEKA_UNORM_ALGO, JAVA_CLASSPATH
 
 
-# Checking requirements on import
-if not path.exists(JAVA_EXE):
-    raise FileNotFoundError("Unable to locate a valid JAVA installation folder")
-
 class Weka(clusteringtoolkit.ClusteringToolkit):
     """
     Default (normalized for kmeans at least) version of Weka
     """
+
     def __init__(self, normalized=True):
         super().__init__()
         self.normalized = normalized
+
+    def check_toolkit_requirements(self):
+        if not path.exists(JAVA_EXE):
+            raise FileNotFoundError("Unable to locate a valid JAVA installation folder")
 
     def toolkit_name(self):
         return WEKA_ALGO
@@ -50,7 +51,8 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file, = self._prepare_files(dataset_name, run_info, False)
         # No seed or parameters for hierarchical
-        command_parts = [JAVA_EXE, "-Xmx100g", "-classpath", JAVA_CLASSPATH, "HierarchicalWekaRun", src_file, output_file]
+        command_parts = [JAVA_EXE, "-Xmx100g", "-classpath", JAVA_CLASSPATH, "HierarchicalWekaRun", src_file,
+                         output_file]
         subprocess.call(command_parts)
 
         return output_file, {}
@@ -76,6 +78,7 @@ class WekaUnorm(Weka):
     """
     Not normalized version of Weka
     """
+
     def __init__(self):
         super().__init__(False)
 

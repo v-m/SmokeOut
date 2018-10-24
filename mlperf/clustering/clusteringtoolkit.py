@@ -26,6 +26,10 @@ class ClusteringToolkit:
         self.redirect_output_files = None
         self.debug = False
         self.temp_files = []
+        self.check_toolkit_requirements()
+
+    def check_toolkit_requirements(self):
+        pass
 
     def set_overwrite_ran_iterations(self, new_value):
         """Set to true to not skip already ran clusterings"""

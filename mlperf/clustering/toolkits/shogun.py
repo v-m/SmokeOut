@@ -119,4 +119,3 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
         gmm.train_em()
 
         print(gmm)
-
