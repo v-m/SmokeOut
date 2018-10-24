@@ -7,12 +7,12 @@ import subprocess
 
 from mlperf.clustering import clusteringtoolkit
 from mlperf.tools.config import MATLAB_EXE, TEMPFOLDER, OCTAVE_EXE
-from mlperf.tools.static import MATLAB_ALGO, OCTAVE_ALGO
+from mlperf.tools.static import MATLAB_TOOLKIT, OCTAVE_TOOLKIT
 
 
 class MatLab(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
-        return MATLAB_ALGO
+        return MATLAB_TOOLKIT
 
     def check_toolkit_requirements(self):
         # Checking requirements on import
@@ -148,7 +148,7 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
 
 class Octave(MatLab):
     def toolkit_name(self):
-        return OCTAVE_ALGO
+        return OCTAVE_TOOLKIT
 
     def check_toolkit_requirements(self):
         if not path.exists(OCTAVE_EXE):

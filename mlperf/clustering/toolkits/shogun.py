@@ -8,12 +8,12 @@ import numpy as np
 
 from mlperf.clustering import clusteringtoolkit
 from mlperf.clustering.clusteringtoolkit import ClusteringToolkit
-from mlperf.tools.static import SHOGUN_ALGO
+from mlperf.tools.static import SHOGUN_TOOLKIT
 
 
 class Shogun(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
-        return SHOGUN_ALGO
+        return SHOGUN_TOOLKIT
 
     def _init(self):
         if self.seed is not None:

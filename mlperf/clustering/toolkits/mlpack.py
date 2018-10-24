@@ -10,12 +10,12 @@ import subprocess
 from mlperf.clustering import clusteringtoolkit
 from mlperf.clustering.clusteringtoolkit import ClusteringToolkit
 from mlperf.tools.config import TEMPFOLDER, MLPACK_BIN
-from mlperf.tools.static import MLPACK_ALGO
+from mlperf.tools.static import MLPACK_TOOLKIT
 
 
 class MLPack(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
-        return MLPACK_ALGO
+        return MLPACK_TOOLKIT
 
     def check_toolkit_requirements(self):
         binaries = ["{}/mlpack_kmeans".format(MLPACK_BIN), "{}/mlpack_mean_shift".format(MLPACK_BIN)]

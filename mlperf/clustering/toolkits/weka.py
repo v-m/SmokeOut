@@ -6,7 +6,7 @@ import subprocess
 from os import path
 from mlperf.clustering import clusteringtoolkit
 from mlperf.tools.config import JAVA_EXE
-from mlperf.tools.static import WEKA_ALGO, WEKA_UNORM_ALGO, JAVA_CLASSPATH
+from mlperf.tools.static import WEKA_TOOLKIT, WEKA_UNORM_TOOLKIT, JAVA_CLASSPATH
 
 
 class Weka(clusteringtoolkit.ClusteringToolkit):
@@ -23,7 +23,7 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
             raise FileNotFoundError("Unable to locate a valid JAVA installation folder")
 
     def toolkit_name(self):
-        return WEKA_ALGO
+        return WEKA_TOOLKIT
 
     # https://stackoverflow.com/questions/6685961/weka-simple-k-means-clustering-assignments
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
@@ -83,7 +83,7 @@ class WekaUnorm(Weka):
         super().__init__(False)
 
     def toolkit_name(self):
-        return WEKA_UNORM_ALGO
+        return WEKA_UNORM_TOOLKIT
 
     @NotImplementedError
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):

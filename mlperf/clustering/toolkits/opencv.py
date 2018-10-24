@@ -7,7 +7,7 @@ import numpy as np
 
 from mlperf.clustering import clusteringtoolkit
 from mlperf.clustering.clusteringtoolkit import ClusteringToolkit
-from mlperf.tools.static import OPENCV_ALGO
+from mlperf.tools.static import OPENCV_TOOLKIT
 
 
 class OpenCV(clusteringtoolkit.ClusteringToolkit):
@@ -18,7 +18,7 @@ class OpenCV(clusteringtoolkit.ClusteringToolkit):
         super().__init__(None)
 
     def toolkit_name(self):
-        return OPENCV_ALGO
+        return OPENCV_TOOLKIT
 
     @staticmethod
     def _clustering_to_list(data_without_target, clusters):

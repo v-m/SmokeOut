@@ -7,13 +7,13 @@ from subprocess import Popen, PIPE
 
 from mlperf.clustering import clusteringtoolkit
 from mlperf.tools.config import R_BIN
-from mlperf.tools.static import R_ALGO
+from mlperf.tools.static import R_TOOLKIT
 import pandas
 
 
 class R(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
-        return R_ALGO
+        return R_TOOLKIT
 
     def check_toolkit_requirements(self):
         if not path.exists(R_BIN):

@@ -7,12 +7,12 @@ from tensorflow.python.framework import constant_op
 
 from mlperf.clustering import clusteringtoolkit
 from mlperf.clustering.clusteringtoolkit import ClusteringToolkit
-from mlperf.tools.static import TENSORFLOW_ALGO
+from mlperf.tools.static import TENSORFLOW_TOOLKIT
 
 
 class TensorFlow(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
-        return TENSORFLOW_ALGO
+        return TENSORFLOW_TOOLKIT
 
     @staticmethod
     def _train_kpp(input_fn, kmeans, iterations=10):

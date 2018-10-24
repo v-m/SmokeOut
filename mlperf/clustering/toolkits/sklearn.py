@@ -4,7 +4,7 @@ __author__ = "Vincenzo Musco (http://www.vmusco.com)"
 
 from mlperf.clustering import clusteringtoolkit
 from mlperf.clustering.clusteringtoolkit import ClusteringToolkit
-from mlperf.tools.static import SKLEARN_ALGO, SKLEARN__FAST_ALGO, SKLEARN_TOL0_ALGO
+from mlperf.tools.static import SKLEARN_TOOLKIT, SKLEARN__FAST_TOOLKIT, SKLEARN_TOL0_TOOLKIT
 import random
 import numpy as np
 import sklearn.cluster
@@ -42,7 +42,7 @@ class SklearnCustomTolerance(Sklearn):
             self.tolerance = float(self.tolerance)
 
     def toolkit_name(self):
-        return SKLEARN_TOL0_ALGO
+        return SKLEARN_TOL0_TOOLKIT
 
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
@@ -107,7 +107,7 @@ class SklearnVanilla(SklearnCustomTolerance):
     """Sklearn with default tolerance"""
 
     def toolkit_name(self):
-        return SKLEARN_ALGO
+        return SKLEARN_TOOLKIT
 
     def __init__(self):
         super().__init__(None)
@@ -199,6 +199,6 @@ class SklearnVanilla(SklearnCustomTolerance):
 
 class SklearnFast(Sklearn):
     def toolkit_name(self):
-        return SKLEARN__FAST_ALGO
+        return SKLEARN__FAST_TOOLKIT
 
     # TODO ?!
