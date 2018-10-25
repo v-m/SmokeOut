@@ -31,7 +31,8 @@ def configure_arg_parse_optionals(parser, enforce_dataset_check=False):
     parser.add_argument('-f', '--output-path', type=str,
                         help='Overwrite the default output folder (default is same as file)', default=None)
     parser.add_argument('-s', '--reuse', action='store_true',
-                        help='If several dataset, perform all runs before going to the next dataset (no dataset interlacement).')
+                        help='If several dataset, perform all runs before going to the next dataset '
+                             '(no dataset interlacement).')
     parser.add_argument('-i', '--init', type=str,
                         help='Parameters needed to initialize the toolkit/variant.')
 
@@ -52,8 +53,6 @@ args = parser.parse_args()
 toolkit = args.toolkit
 
 i = importlib.import_module("{}.{}".format(mlperf.clustering.toolkits.__package__, toolkit))
-
-# print("=== ".format(toolkit), file=sys.stderr)
 
 ## Toolkit Variant
 argument_position = sys.argv.index(toolkit)
@@ -98,10 +97,10 @@ if args.init:
         init_key, init_value = init_option.split("=")
         init[init_key] = init_value
 
-print("Now loading module {}/{}...".format(toolkit,variant), file=sys.stderr)
+print("Loading module {}/{}...".format(toolkit, variant), file=sys.stderr)
 try:
     class_instance = candidate_class(**init)
-    print("✔ Module {} loaded successfully.".format(toolkit), file=sys.stderr)
+    print("✔ Module {}/{} loaded successfully.".format(toolkit, variant), file=sys.stderr)
 except Exception as e:
     print("⨯ Error importing module {}/{}. Please check your system installation.".format(toolkit, variant),
           file=sys.stderr)
@@ -122,11 +121,16 @@ reuse = args.reuse
 if len(args.dataset) == 1:
     reuse = True
 
-print("Toolkit/Variant/Algorithm = {}/{}/{}".format(toolkit, variant, algorithm))
-print("Runs = {}".format(args.runs if not args.infinite_runs else "Infinite"))
-print("Dataset = {}".format(args.dataset))
-print("Base = {}".format(args.base))
-print("Reuse = {}".format(reuse))
+print("\nCurrent configuration:")
+print("- Toolkit = {}".format(toolkit))
+print("- Variant = {}".format(variant))
+print("- Algorithm = {}".format(algorithm))
+print("- Runs = {}".format(args.runs if not args.infinite_runs else "Infinite"))
+print("- Dataset:")
+for dataset in args.dataset:
+    print("\t- {}".format(dataset))
+print("- Base = {}".format(args.base))
+print("- Reuse = {}".format(reuse))
 
 fulldatasets = args.dataset
 
@@ -148,25 +152,24 @@ for datasets in fulldatasets:
     while args.infinite_runs or runid < args.runs:
         resolved_run_nr = args.base + runid
         RUN_INFO = run_for_nr(class_instance.toolkit_name(), algorithm, resolved_run_nr)
-        print("*****")
-        print("RUN: {}".format(RUN_INFO))
-        print("*****")
+        print("\n* RUN: {}.".format(RUN_INFO))
+
         for dataset in datasets:
+            print("\tRUN {}. ALGO = {}".format(runid, algorithm), end="")
+            sys.stdout.flush()
             source_file = dataset
 
             if data is None or not reuse:
                 # print("Reading file {}...".format(source_file))
                 df = DatasetFacts.read_dataset(source_file)
-
                 data = df.data
                 number_clusters = df.nb_features()
                 ground_truth_cluster_ids = df.ground_truth_cluster_ids()
                 data_without_target = df.data_without_target()
-                print("Dataset stats (#features/#instances) =", number_clusters, df.nb_instances())
+                print(" [loaded data: {} features, {} instances]".format(number_clusters, df.nb_instances()), end="")
             else:
-                print("Reusing previously loaded information...")
+                print(" [reusing data]", end="")
 
-            print("RUN {}. ALGO = {}".format(runid, algorithm))
             try:
                 if algorithm == 'ap':
                     # AP Cluster does not expect a #clusters
@@ -189,6 +192,6 @@ for datasets in fulldatasets:
                 print(e)
                 traceback.print_exc()
             except AlreadyRanException as e:
-                print("Skipping...")
+                print(" [skipped]", end="")
 
         runid += 1

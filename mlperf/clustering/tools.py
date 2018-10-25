@@ -40,8 +40,6 @@ class DatasetFacts:
 
     @staticmethod
     def read_dataset(source_file):
-        print("Reading file {}...".format(source_file))
-
         chunksize = 100000
         text_file_reader = pandas.read_csv(source_file, sep='\t', chunksize=chunksize, iterator=True)
         data = pandas.concat(text_file_reader, ignore_index=True)
