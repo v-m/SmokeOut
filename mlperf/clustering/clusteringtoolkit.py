@@ -130,6 +130,9 @@ class ClusteringToolkit:
         for temp_file in self.temp_files:
             os.unlink(temp_file)
 
+        self.temp_files.clear()
+
+
     @NotImplementedError
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
