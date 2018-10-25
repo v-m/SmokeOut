@@ -139,6 +139,14 @@ class ClusteringToolkit:
         pass
 
     @NotImplementedError
+    def run_kmeans_random(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
+        """
+        Select randomly the starting points using the toolkit if it proposes a way to do so.
+        """
+        pass
+
+    @NotImplementedError
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
         pass

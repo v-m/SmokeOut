@@ -44,13 +44,14 @@ class SklearnCustomTolerance(Sklearn):
     def toolkit_name(self):
         return SKLEARN_TOL0_TOOLKIT
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
-                             nb_iterations=None):
+
+    def base_kmeans_specified_init(self, nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                                   init, run_info=None, nb_iterations=None):
         self._init()
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         # Create a KMean model.
-        params = {"n_clusters": nb_clusters}
+        params = {"n_clusters": nb_clusters, "init": init}
         if self.tolerance is not None:
             params['tol'] = self.tolerance
         if nb_iterations is not None:
@@ -64,27 +65,22 @@ class SklearnCustomTolerance(Sklearn):
         ClusteringToolkit._save_centroids(self._centroids_to_list(sklearn_kmean_model), centroids_file)
 
         return output_file, {"centroids": centroids_file}
+
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
+        return self.base_kmeans_specified_init(nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                                               'k-means++', run_info, nb_iterations)
+
+    def run_kmeans_random(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                          nb_iterations=None):
+        return self.base_kmeans_specified_init(nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                                               'random', run_info, nb_iterations)
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
-        self._init()
-        output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
-        # Create a KMean model.
-        params = {"n_clusters": nb_clusters, "init": initial_clusters}
-        if self.tolerance is not None:
-            params['tol'] = self.tolerance
-        if nb_iterations is not None:
-            params['max_iter'] = nb_iterations
-
-        sklearn_kmean_model = sklearn.cluster.KMeans(**params)
-        sklearn_kmean_model.fit(data_without_target)
-
-        ClusteringToolkit._save_clustering(self._clustering_to_list(data_without_target, sklearn_kmean_model.labels_),
-                                           output_file)
-        ClusteringToolkit._save_centroids(self._centroids_to_list(sklearn_kmean_model), centroids_file)
-
-        return output_file, {"centroids": centroids_file}
+        return self.base_kmeans_specified_init(nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                                               initial_clusters, run_info, nb_iterations)
 
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         self._init()
