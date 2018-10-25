@@ -26,6 +26,7 @@ def configure_arg_parse_optionals(parser, enforce_dataset_check=False):
                         help='Specify the absolute part of the path for dataset selection', default=None)
     parser.add_argument('-d', '--dataset', action='append', required=enforce_dataset_check,
                         help='Run this dataset tsv file', default=None)
+    parser.add_argument('-S', '--sep', type=str, help='Separator to use for dataset file (default \\t)', default='\t')
     parser.add_argument('-o', '--overwrite', action='store_true',
                         help='If a specific run is already ran, recompute it anyway', default=False)
     parser.add_argument('-f', '--output-path', type=str,
@@ -131,6 +132,7 @@ for dataset in args.dataset:
     print("\t- {}".format(dataset))
 print("- Base = {}".format(args.base))
 print("- Reuse = {}".format(reuse))
+print("- Separator = {}".format(repr(args.sep)))
 
 fulldatasets = args.dataset
 
@@ -161,7 +163,7 @@ for datasets in fulldatasets:
 
             if data is None or not reuse:
                 # print("Reading file {}...".format(source_file))
-                df = DatasetFacts.read_dataset(source_file)
+                df = DatasetFacts.read_dataset(source_file, args.sep)
                 data = df.data
                 number_clusters = df.nb_features()
                 ground_truth_cluster_ids = df.ground_truth_cluster_ids()
