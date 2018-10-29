@@ -165,10 +165,13 @@ for datasets in fulldatasets:
                 # print("Reading file {}...".format(source_file))
                 df = DatasetFacts.read_dataset(source_file, args.sep)
                 data = df.data
-                number_clusters = df.nb_features()
+                number_clusters = df.nb_clusters()
                 ground_truth_cluster_ids = df.ground_truth_cluster_ids()
                 data_without_target = df.data_without_target()
-                print(" [loaded data: {} features, {} instances]".format(number_clusters, df.nb_instances()), end="")
+                print(" [loaded data: {} features, {} instances, {} clusters]".format(df.nb_features(),
+                                                                                      df.nb_instances(),
+                                                                                      number_clusters),
+                      end="")
             else:
                 print(" [reusing data]", end="")
 

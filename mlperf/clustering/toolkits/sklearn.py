@@ -36,14 +36,17 @@ class SklearnCustomTolerance(Sklearn):
 
     def __init__(self, tolerance):
         super().__init__()
-        self.tolerance = tolerance
+        self.tolerance = None
 
-        if self.tolerance is not None and type(self.tolerance) == str:
-            self.tolerance = float(self.tolerance)
+        self.set_tolerance(tolerance)
+
+    def set_tolerance(self, value):
+        self.tolerance = value
+        if value is not None and type(value) == str:
+            self.tolerance = float(value)
 
     def toolkit_name(self):
         return SKLEARN_TOL0_TOOLKIT
-
 
     def base_kmeans_specified_init(self, nb_clusters, src_file, data_without_target, dataset_name, run_number,
                                    init, run_info=None, nb_iterations=None):
@@ -51,7 +54,7 @@ class SklearnCustomTolerance(Sklearn):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         # Create a KMean model.
-        params = {"n_clusters": nb_clusters, "init": init}
+        params = {"n_clusters": nb_clusters, "init": init, "n_init": 1}
         if self.tolerance is not None:
             params['tol'] = self.tolerance
         if nb_iterations is not None:

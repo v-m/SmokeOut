@@ -24,7 +24,7 @@ class DatasetFacts:
     def ground_truth_cluster_ids(self):
         return self.target().unique()
 
-    def number_clusters(self):
+    def nb_clusters(self):
         return len(self.ground_truth_cluster_ids())
 
     def data_without_target(self):
