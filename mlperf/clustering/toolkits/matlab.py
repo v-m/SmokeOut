@@ -95,15 +95,15 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
         return output_file, {"centroids": centroids_file}
 
     def run_kmeans_auto(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
-                             nb_iterations=None):
+                        nb_iterations=None):
         """
-        WARNING: Default is k-means.
+        WARNING: Default is k-means++ (https://www.mathworks.com/help/stats/kmeans.html)
         """
-        self.run_kmeans_plus_plus(nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info,
-                                  nb_iterations)
+        self.run_kmeans_auto_param(nb_clusters, src_file, data_without_target, dataset_name, run_number, None, run_info,
+                                   nb_iterations)
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
-                             nb_iterations=None):
+    def run_kmeans_auto_param(self, nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                              init_mode=None, run_info=None, nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         temp_file = self._dump_data_on_clean_csv(data_without_target)
@@ -113,8 +113,8 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
         if nb_iterations is not None:
             built_command_more = ', MaxIter, {}'.format(nb_iterations)
 
-        built_command = "kmeans(csvread('{}'), {}{})".format(temp_file, str(nb_clusters), built_command_more)
-
+        built_command = "kmeans(csvread('{}'), {}, 'Start', '{}'{})".format(temp_file, str(nb_clusters), init_mode,
+                                                                            built_command_more)
         command_parts = self._build_command(built_command, temp_file_out, centroids_file)
         subprocess.run(command_parts, stdout=subprocess.PIPE)
 
@@ -122,6 +122,16 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
         self.clean_temporary_files()
 
         return output_file, {"centroids": centroids_file}
+
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
+        self.run_kmeans_auto_param(nb_clusters, src_file, data_without_target, dataset_name, run_number, 'plus',
+                                   run_info, nb_iterations)
+
+    def run_kmeans_random(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                          nb_iterations=None):
+        self.run_kmeans_auto_param(nb_clusters, src_file, data_without_target, dataset_name, run_number, 'sample',
+                                   run_info, nb_iterations)
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file, = self._prepare_files(dataset_name, run_info, False)
