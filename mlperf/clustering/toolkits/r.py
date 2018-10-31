@@ -60,6 +60,37 @@ class R(clusteringtoolkit.ClusteringToolkit):
 
         return ret
 
+    def _build_kmeanspp_script(self, src_file, dst_clusters, dst_centroids,
+                               seed=None):
+        """
+        Run kpp using the flexclust package and kcca function.
+        """
+        script_parts = ['''library("flexclust")''']
+
+        if seed is not None:
+            script_parts.append('''set.seed({})'''.format(seed))
+
+        script_parts.append('''source_file=gzfile("{}");'''.format(src_file))
+        script_parts.append('''dat=read.csv(source_file, header=T, sep='\t')''')
+
+        # Let's remove the target feature
+        script_parts.append('''clustersNumber = nrow(unique(dat["target"]))''')
+        script_parts.append('''datWithoutTarget = subset( dat, select = -target )''')
+
+        # https://www.rdocumentation.org/packages/flexclust/versions/1.3-5/topics/kcca
+        script_parts.append('clusteringResult = kcca(datWithoutTarget, clustersNumber, family=kccaFamily("kmeans"),'
+                            'control=list(initcent="kmeanspp"), simple=F)')
+
+        script_parts.append('''write.csv(clusters(clusteringResult), file='{}')'''.format(dst_clusters))
+        script_parts.append('''write.csv(parameters(clusteringResult), file='{}')'''.format(dst_centroids))
+
+        ret = "\n".join(script_parts).encode()
+
+        if self.debug:
+            print(ret)
+
+        return ret
+
     def _build_hierarchical(self, src_file, dst_clusters, seed=None):
         script_parts = []
 
@@ -90,14 +121,24 @@ class R(clusteringtoolkit.ClusteringToolkit):
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
-        # if initialClustersCsvFile is None and hundredIters:
-        #     print("R kcca function don't have the iteration parameter !")
-        #     return
-
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         r_script = self._build_kmeans_script(src_file, output_file, centroids_file, initial_clusters_file,
                                              nb_iterations, self.seed)
+        p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p.communicate(input=r_script)
+
+        dta = pandas.read_csv(centroids_file)
+        dta.drop(dta.columns[[0]], axis=1).to_csv(centroids_file, index=False, header=False)
+
+        return output_file, {"centroids": centroids_file}
+
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
+        output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
+
+        r_script = self._build_kmeanspp_script(src_file, output_file, centroids_file, self.seed)
+        print(r_script)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=r_script)
 
