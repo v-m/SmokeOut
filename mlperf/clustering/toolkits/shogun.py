@@ -45,8 +45,8 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
 
         return centers, result
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
-                             nb_iterations=None):
+    def run_kmeans_base(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, config_function,
+                        run_info=None, nb_iterations=None):
         self._init()
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
@@ -56,8 +56,8 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
 
         # KMeans object created
         kmeans = shogun.KMeans(nb_clusters, distance)
-        # set KMeans++ flag
-        kmeans.set_use_kmeanspp(True)
+        if config_function is not None:
+            config_function(kmeans)
 
         if nb_iterations is not None:
             kmeans.set_max_iter(nb_iterations)
@@ -67,29 +67,30 @@ class Shogun(clusteringtoolkit.ClusteringToolkit):
         ClusteringToolkit._save_centroids(Shogun._centroids_to_list(centers), centroids_file)
 
         return output_file, {"centroids": centroids_file}
+
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
+        def config_function(kmeans):
+            kmeans.set_use_kmeanspp(True)
+
+        return self.run_kmeans_base(nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                                    config_function, run_info, nb_iterations)
+
+    def run_kmeans_random(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                          nb_iterations=None):
+
+        return self.run_kmeans_base(nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                                    None, run_info, nb_iterations)
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
-        self._init()
-        output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
-        train_features = shogun.RealFeatures(data_without_target.values.astype("float64").transpose())
-        # distance metric over feature matrix - Euclidean distance
-        distance = shogun.EuclideanDistance(train_features, train_features)
+        def config_function(kmeans):
+            # set new initial centers
+            kmeans.set_initial_centers(initial_clusters.astype("float64").transpose())
 
-        # KMeans object created
-        kmeans = shogun.KMeans(nb_clusters, distance)
-        # set new initial centers
-        kmeans.set_initial_centers(initial_clusters.astype("float64").transpose())
-
-        if nb_iterations is not None:
-            kmeans.set_max_iter(nb_iterations)
-
-        centers, result = Shogun._kmeans_process(kmeans)
-        ClusteringToolkit._save_clustering(Shogun._clustering_to_list(data_without_target, result), output_file)
-        ClusteringToolkit._save_centroids(Shogun._centroids_to_list(centers), centroids_file)
-
-        return output_file, {"centroids": centroids_file}
+        return self.run_kmeans_base(nb_clusters, src_file, data_without_target, dataset_name, run_number,
+                                    config_function, run_info, nb_iterations)
 
     @NotImplementedError
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):

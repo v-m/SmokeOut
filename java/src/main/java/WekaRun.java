@@ -19,6 +19,8 @@ import java.util.zip.GZIPInputStream;
 public class WekaRun {
     public static void main(String[] args) throws Exception {
         CSVLoader loader = new CSVLoader();
+        String mode = "kpp";
+
         loader.setFieldSeparator("\t");
         loader.setSource(new GZIPInputStream(new FileInputStream(args[0])));
 
@@ -41,6 +43,8 @@ public class WekaRun {
                     kmeans.setDistanceFunction(dist);
                 }else if(subparts[0].equals("seed")) {
                     kmeans.setSeed(Integer.parseInt(subparts[1]));
+                }else if(subparts[0].equals("mode")) {
+                    mode = subparts[1];
                 }
             }
         }
@@ -54,7 +58,11 @@ public class WekaRun {
         }
 
         kmeans.setNumClusters(classes.size());
-        kmeans.setInitializationMethod(new SelectedTag(SimpleKMeans.KMEANS_PLUS_PLUS, SimpleKMeans.TAGS_SELECTION));
+        if(mode.equals("kpp")){
+            kmeans.setInitializationMethod(new SelectedTag(SimpleKMeans.KMEANS_PLUS_PLUS, SimpleKMeans.TAGS_SELECTION));
+        }else if(mode.equals("rand")){
+            kmeans.setInitializationMethod(new SelectedTag(SimpleKMeans.RANDOM , SimpleKMeans.TAGS_SELECTION));
+        }
         classes.clear();
 
         dataset.deleteAttributeAt(dataset.attribute("target").index());

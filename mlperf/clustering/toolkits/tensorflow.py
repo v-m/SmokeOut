@@ -1,4 +1,5 @@
 """Tensorflow clustering"""
+from tensorflow.contrib.factorization import KMEANS_PLUS_PLUS_INIT
 
 __author__ = "Vincenzo Musco (http://www.vmusco.com)"
 
@@ -75,7 +76,8 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
         if self.seed is not None:
             tf.set_random_seed(self.seed)
 
-        kmeans = tf.contrib.factorization.KMeansClustering(num_clusters=nb_clusters, use_mini_batch=False)
+        kmeans = tf.contrib.factorization.KMeansClustering(num_clusters=nb_clusters,
+                                                           initial_clusters=KMEANS_PLUS_PLUS_INIT, use_mini_batch=False)
 
         points, input_fn = TensorFlow._build_points_and_input_fn(data_without_target)
         TensorFlow._train_kpp(input_fn, kmeans, 10 if nb_iterations is None else nb_iterations)

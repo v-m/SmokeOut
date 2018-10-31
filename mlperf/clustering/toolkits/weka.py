@@ -25,9 +25,8 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
     def toolkit_name(self):
         return WEKA_TOOLKIT
 
-    # https://stackoverflow.com/questions/6685961/weka-simple-k-means-clustering-assignments
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
-                             nb_iterations=None):
+    def run_kmeans_base(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                        nb_iterations=None, mode=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
         weka_rest = []
 
@@ -40,6 +39,9 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
         if self.seed is not None:
             weka_rest.append("seed={}".format(self.seed))
 
+        if mode is not None:
+            weka_rest.append("mode={}".format(mode))
+
         command_parts = [JAVA_EXE, "-classpath", JAVA_CLASSPATH, "WekaRun", src_file, output_file, centroids_file]
 
         if len(weka_rest) > 0:
@@ -47,6 +49,22 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
 
         subprocess.call(command_parts)
         return output_file, {"centroids": centroids_file}
+
+    # https://stackoverflow.com/questions/6685961/weka-simple-k-means-clustering-assignments
+    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
+        return self.run_kmeans_base(nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info,
+                                    nb_iterations, "kpp")
+
+    def run_kmeans_random(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                          nb_iterations=None):
+        return self.run_kmeans_base(nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info,
+                                    nb_iterations, "auto")
+
+    def run_kmeans_auto(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                        nb_iterations=None):
+        return self.run_kmeans_base(nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info,
+                                    nb_iterations, None)
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):
         output_file, = self._prepare_files(dataset_name, run_info, False)

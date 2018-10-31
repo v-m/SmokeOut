@@ -57,8 +57,11 @@ class MLPack(clusteringtoolkit.ClusteringToolkit):
 
         return output_file, {"centroids": centroids_file}
 
-    def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+    def run_kmeans_auto(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
+        """
+        Use the `naive` approach which is the default.
+        """
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
         temp_file = self._dump_data_on_clean_csv(data_without_target)
         temp_file2 = self.create_temporary_file()

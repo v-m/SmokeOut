@@ -147,6 +147,14 @@ class ClusteringToolkit:
         pass
 
     @NotImplementedError
+    def run_kmeans_auto(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
+                             nb_iterations=None):
+        """
+        Select automatically the starting point if the algorithm proposes such an approach
+        """
+        pass
+
+    @NotImplementedError
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
         pass
