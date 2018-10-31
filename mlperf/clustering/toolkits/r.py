@@ -138,7 +138,6 @@ class R(clusteringtoolkit.ClusteringToolkit):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         r_script = self._build_kmeanspp_script(src_file, output_file, centroids_file, self.seed)
-        print(r_script)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=r_script)
 

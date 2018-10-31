@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """Generate clustering using specific toolkit/algorithm and configuration"""
+from time import time
 
 __author__ = "Vincenzo Musco (http://www.vmusco.com)"
 __date__ = "Oct 23, 2018"
@@ -36,6 +37,8 @@ def configure_arg_parse_optionals(parser, enforce_dataset_check=False):
                              '(no dataset interlacement).')
     parser.add_argument('-i', '--init', type=str,
                         help='Parameters needed to initialize the toolkit/variant.')
+    parser.add_argument('-t', '--times', type=str, default=None,
+                        help='Save generation time on a file.')
 
 
 toolkit = os.listdir(mlperf.clustering.toolkits.__path__[0])
@@ -113,6 +116,9 @@ class_instance.set_overwrite_ran_iterations(args.overwrite)
 if args.output_path is not None:
     class_instance.set_redirect_output_path(args.output_path)
 
+    if not os.path.exists(args.output_path):
+        os.makedirs(args.output_path)
+
 candidate_function = getattr(candidate_class, "run_{}".format(algorithm))
 function_instance = getattr(class_instance, "run_{}".format(algorithm))
 
@@ -157,7 +163,8 @@ for datasets in fulldatasets:
         print("\n* RUN: {}.".format(RUN_INFO))
 
         for dataset in datasets:
-            print("\tRUN {}. ALGO = {}".format(runid, algorithm), end="")
+            run_infos = "RUN {}. ALGO = {}".format(runid, algorithm)
+            print("\t{}".format(run_infos), end="")
             sys.stdout.flush()
             source_file = dataset
 
@@ -176,6 +183,7 @@ for datasets in fulldatasets:
                 print(" [reusing data]", end="")
 
             try:
+                start_time = time()
                 if algorithm == 'ap':
                     # AP Cluster does not expect a #clusters
                     function_instance(source_file, data_without_target, dataset, resolved_run_nr, RUN_INFO)
@@ -190,6 +198,9 @@ for datasets in fulldatasets:
                     function_instance(number_clusters, source_file, data_without_target, dataset, resolved_run_nr,
                                       RUN_INFO)
 
+                if args.times is not None:
+                    with open(args.times, "a") as times_fp:
+                        times_fp.write("{} = {}\n".format(run_infos, (time() - start_time)))
 
             except Exception as e:
                 print("!!!!! Exception occured !!!!!")
