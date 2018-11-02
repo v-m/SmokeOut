@@ -49,8 +49,8 @@ class DatasetFacts:
         return ret
 
 
-def run_for_nr(run_base, algorithm, run_id):
-    return "{}.{}{}".format(run_base, algorithm, run_id)
+def run_for_nr(run_base, variant, algorithm, run_id):
+    return "{}-{}-{}".format(variant, algorithm, run_id)
 
 
 def read_dataset(source_file):

@@ -23,3 +23,10 @@ The latter may require you to write a short bash script for initializing the var
 ## Additional notes
 
 To build Weka classes, use: `gradle compileJava`.
+
+## System setup
+
+```
+install.packages('ClusterR')
+install.packages('flexclust')
+```

@@ -159,12 +159,12 @@ for datasets in fulldatasets:
     runid = 0
     while args.infinite_runs or runid < args.runs:
         resolved_run_nr = args.base + runid
-        RUN_INFO = run_for_nr(class_instance.toolkit_name(), algorithm, resolved_run_nr)
+        RUN_INFO = run_for_nr(class_instance.toolkit_name(), variant, algorithm, resolved_run_nr)
         print("\n* RUN: {}.".format(RUN_INFO))
 
         for dataset in datasets:
-            run_infos = "RUN {}. ALGO = {}".format(runid, algorithm)
-            print("\t{}".format(run_infos), end="")
+            run_infos = "RUN {}. ALGO = {}/{}/{}".format(runid, class_instance.toolkit_name(), variant, algorithm)
+            print("\n\t{}".format(run_infos), end="")
             sys.stdout.flush()
             source_file = dataset
 
@@ -183,7 +183,7 @@ for datasets in fulldatasets:
                 print(" [reusing data]", end="")
 
             try:
-                start_time = time()
+                start_time = int(time() * 1000)
                 if algorithm == 'ap':
                     # AP Cluster does not expect a #clusters
                     function_instance(source_file, data_without_target, dataset, resolved_run_nr, RUN_INFO)
@@ -200,7 +200,7 @@ for datasets in fulldatasets:
 
                 if args.times is not None:
                     with open(args.times, "a") as times_fp:
-                        times_fp.write("{} = {}\n".format(run_infos, (time() - start_time)))
+                        times_fp.write("{}. {} ({})\n".format(dataset, run_infos, (int(time() * 1000) - start_time)))
 
             except Exception as e:
                 print("!!!!! Exception occured !!!!!")
@@ -211,3 +211,6 @@ for datasets in fulldatasets:
                 print(" [skipped]", end="")
 
         runid += 1
+
+
+
