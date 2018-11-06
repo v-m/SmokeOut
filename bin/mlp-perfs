@@ -1,0 +1,186 @@
+#!/usr/bin/env python
+
+# This script compute scores wrt different executions of the same algorithm (different runs)
+# it consider the average, min and max between the runs.
+# It uses std metrics tools from the sklearn framework.
+# Produce a huge JSON summary file.
+# Author: Vincenzo Musco (http://www.vmusco.com)
+import json
+import os
+import sys
+import statistics
+
+import argparse
+from glob import glob
+import re
+
+from sklearn.metrics import adjusted_rand_score
+
+from mlperf.clustering.tools import DatasetFacts
+from mlperf.clustering.tools import read_dataset_csv_file_logic
+
+
+def median(data):
+    """Modified version from the statistics package – returns as well the index of the median element"""
+    data = sorted(data)
+    n = len(data)
+    if n == 0:
+        raise statistics.StatisticsError("no median for empty data")
+    if n % 2 == 1:
+        return data[n // 2], [n // 2]
+    else:
+        i = n // 2
+        return (data[i - 1] + data[i]) / 2, [i - 1, i]
+
+
+parser = argparse.ArgumentParser(description='Generate performance analysis on produced clusters', add_help=False)
+parser.add_argument("outfile", type=str, help="The file to add to (shell with stdout keyword)")
+parser.add_argument("-d", "--dataset", type=str, help="Dataset is fixed", default=None)
+parser.add_argument("-t", "--toolkit", type=str, help="Toolkit is fixed", default=None)
+parser.add_argument("-a", "--algo", type=str, help="Algo is fixed", default=None)
+parser.add_argument("-S", "--sep", type=str, help="Separator to use in dataset file", default="\t")
+parser.add_argument("-r", "--recompute", action='store_true', help="Recompute the scores, even if anything has been "
+                                                                   "added", default=False)
+parser.add_argument("-v", "--verbose", action='store_true', help="Display what's going on", default=False)
+parser.add_argument("groundtruthre", type=str, help="Where to locate the ground truth (required group name: dataset)")
+parser.add_argument("datasetnamere", type=str, help="A regular expression matching the dataset name on the run"
+                                                    " filename."
+                                                    "Required grouping names: dataset"
+                                                    "Possible groupinds names: algo, toolkit")
+parser.add_argument("clusterfiles", nargs='+', help="Path to cluster files (can use wildcard masks)")
+
+args = parser.parse_args()
+
+dataset_name_re = re.compile(args.datasetnamere)
+
+output_json = {}
+if os.path.exists(args.outfile) and args.outfile != 'stdout':
+    with open(args.outfile) as fp:
+        output_json = json.load(fp)
+
+added = False
+for ff in args.clusterfiles:
+    for f in glob(ff):
+        matches = None
+        if args.dataset is None or args.toolkit is None or args.algo is None:
+            matches = dataset_name_re.fullmatch(f)
+            if matches is None:
+                if args.verbose:
+                    print("File {} skipped...".format(f), file=sys.stderr)
+                continue
+            else:
+                if args.verbose:
+                    print("+ {}".format(f), file=sys.stderr)
+                added = True
+
+        if args.dataset is not None:
+            dataset_name = args.dataset
+        else:
+            dataset_name = matches.group('dataset')
+
+        ground_truth_file = args.groundtruthre.replace("<dataset>", dataset_name)
+        if not os.path.exists(ground_truth_file):
+            print("Ground truth file {} not found.".format(ground_truth_file))
+            sys.exit(1)
+
+        if args.toolkit is not None:
+            toolkit_name = args.toolkit
+        else:
+            toolkit_name = matches.group('toolkit')
+
+        if args.algo is not None:
+            algo_name = args.algo
+        else:
+            algo_name = matches.group('algo')
+
+        if dataset_name not in output_json:
+            output_json[dataset_name] = {}
+
+        if toolkit_name not in output_json[dataset_name]:
+            output_json[dataset_name][toolkit_name] = {}
+
+        if algo_name not in output_json[dataset_name][toolkit_name]:
+            output_json[dataset_name][toolkit_name][algo_name] = {
+                'runs': {},
+                'stats': {}
+            }
+
+        output_json[dataset_name]["__ground_truth_file"] = ground_truth_file
+        output_json[dataset_name][toolkit_name][algo_name]['runs'][f] = {}
+
+if not added and not args.recompute:
+    print("Nothing added on file. File not changed.", file=sys.stderr)
+    sys.exit(1)
+
+print("\nComputing scores", file=sys.stderr, end="")
+for dataset_name in output_json:
+    ground_truth_file = output_json[dataset_name]["__ground_truth_file"]
+
+    if args.verbose:
+        print("\nProcessing {}".format(ground_truth_file), file=sys.stderr, end="")
+
+    df = DatasetFacts.read_dataset(ground_truth_file, sep=args.sep)
+    data_target = df.target()
+    dataset_size = df.nb_instances()
+
+    for toolkit_name in output_json[dataset_name]:
+        if toolkit_name == "__ground_truth_file":
+            continue
+
+        for algo_name in output_json[dataset_name][toolkit_name]:
+            for f in output_json[dataset_name][toolkit_name][algo_name]['runs']:
+                if args.verbose:
+                    print(".".format(f), file=sys.stderr, end="")
+
+                try:
+                    run_read = read_dataset_csv_file_logic(f)
+
+                    if run_read is None:
+                        continue
+                    results_reader = list(map(lambda x: x[1], run_read))
+                    output_json[dataset_name][toolkit_name][algo_name]['runs'][f]['rand_score'] = adjusted_rand_score(
+                        data_target, results_reader)
+                except Exception as e:
+                    #Do something if any reading/parsing problem?!
+                    pass
+
+print("\nComputing aggregated values", file=sys.stderr, end="")
+
+for dataset_name in output_json:
+    if args.verbose:
+        print("\nProcessing {}".format(dataset_name), file=sys.stderr, end="")
+
+    for toolkit_name in output_json[dataset_name]:
+        if toolkit_name == "__ground_truth_file":
+            continue
+
+        for algo_name in output_json[dataset_name][toolkit_name]:
+            scores = {}
+            runs = list(output_json[dataset_name][toolkit_name][algo_name]['runs'].keys())
+            values = {}
+            for f in runs:
+                for score_name in output_json[dataset_name][toolkit_name][algo_name]['runs'][f]:
+                    if score_name not in values:
+                        values[score_name] = []
+
+                    values[score_name].append(output_json[dataset_name][toolkit_name][algo_name]['runs'][f][score_name])
+                    # for run in output_json[dataset_name][toolkit_name][algo_name]['runs'][f][score_name]:
+
+
+
+            for score_name in values:
+                working_list = values[score_name]
+                median_value, median_pos = median(working_list)
+                output_json[dataset_name][toolkit_name][algo_name]['stats'][score_name] = {
+                    'count': len(working_list),
+                    'min': {'value': min(working_list), 'run': runs[working_list.index(min(working_list))]},
+                    'med': {'value': median_value,
+                            'run': list(map(lambda x: runs[x], median_pos))},
+                    'max': {'value': max(working_list), 'run': runs[working_list.index(max(working_list))]},
+                }
+
+if args.outfile == 'stdout':
+    print(json.dumps(output_json))
+else:
+    with open(args.outfile, "w") as fp:
+        json.dump(output_json, fp)

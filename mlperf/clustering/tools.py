@@ -1,4 +1,5 @@
 """Tools used for clustering analysis"""
+import csv
 
 __author__ = "Vincenzo Musco (http://www.vmusco.com)"
 
@@ -105,3 +106,8 @@ def read_or_draw_centroids(dataset_name, run_info, nb_clusters, data, redirect_o
         initial_clusters = read_centroids_file(drawn_clusters_file_path)
 
     return drawn_clusters_file_path, initial_clusters
+
+
+def read_dataset_csv_file_logic(out_ile):
+    with open(out_ile, 'r') as csv_file:
+        return [l for l in csv.reader(csv_file) if l[0] != ""]

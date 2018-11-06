@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-'''
-Convert a sparse notation file:
+"""Convert a sparse notation file:
 <target> ftid:value ...
 Into a dense one:
-<target>    0_if_zero   <value_if_not_zero> ...
-Author: Vincenzo Musco (http://www.vmusco.com)
-'''
+<target>    0_if_zero   <value_if_not_zero> ..."""
+
+__author__ = "Vincenzo Musco (http://www.vmusco.com)"
+__date__ = "Oct 25, 2018"
 
 import sys
 import argparse

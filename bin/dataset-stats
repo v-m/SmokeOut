@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+
+"""Shows simple facts for a dataset"""
+import argparse
+
+__author__ = "Vincenzo Musco (http://www.vmusco.com)"
+__date__ = "Oct 23, 2018"
+
+from mlperf.clustering.tools import DatasetFacts
+
+parser = argparse.ArgumentParser(description='Get the shape of a dataset.', add_help=False)
+parser.add_argument("dataset", type=str, help="Dataset with ground truth")
+parser.add_argument('-S', '--sep', type=str, help='Separator to use for dataset file (default \\t)', default='\t')
+
+args = parser.parse_args()
+
+df = DatasetFacts.read_dataset(args.dataset, sep=args.sep)
+
+print("# instances =", df.nb_instances())
+print("# Features =", df.nb_features())

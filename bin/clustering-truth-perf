@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+"""Compute the performance for runs of a tool"""
+
+__author__ = "Vincenzo Musco (http://www.vmusco.com)"
+__date__ = "Oct 23, 2018"
+
+import glob
+import argparse
+
+from mlperf.clustering.analysis.performances import read_final_clustering
+from mlperf.clustering.tools import DatasetFacts
+from sklearn.metrics import adjusted_rand_score
+
+parser = argparse.ArgumentParser(description='Compute performances', add_help=False)
+parser.add_argument("dataset", type=str, help="Dataset with ground truth")
+parser.add_argument('-S', '--sep', type=str, help='Separator to use for dataset file (default \\t)', default='\t')
+parser.add_argument("clusters", nargs='+', help="Clusters files path(s) – wildcard mask compatible")
+
+args = parser.parse_args()
+
+df = DatasetFacts.read_dataset(args.dataset, sep=args.sep)
+
+for file_pattern in args.clusters:
+    for file in glob.glob(file_pattern):
+        cluster_1 = read_final_clustering(file)
+        print(adjusted_rand_score(df.target(), cluster_1))
