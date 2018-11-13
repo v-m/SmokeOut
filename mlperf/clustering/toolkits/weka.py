@@ -49,7 +49,8 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
         if len(weka_rest) > 0:
             command_parts.append(";".join(weka_rest))
 
-        # print("' '".join(command_parts))
+        if self.debug:
+            print("' '".join(command_parts))
 
         subprocess.call(command_parts)
         return output_file, {"centroids": centroids_file}

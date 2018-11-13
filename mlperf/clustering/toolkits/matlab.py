@@ -111,7 +111,7 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
 
         built_command_more = ''
         if nb_iterations is not None:
-            built_command_more = ', MaxIter, {}'.format(nb_iterations)
+            built_command_more = ', \'MaxIter\', {}'.format(nb_iterations)
 
         built_command = "kmeans(csvread('{}'), {}, 'Start', '{}'{})".format(temp_file, str(nb_clusters), init_mode,
                                                                             built_command_more)
@@ -125,12 +125,12 @@ class MatLab(clusteringtoolkit.ClusteringToolkit):
 
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
-        self.run_kmeans_auto_param(nb_clusters, src_file, data_without_target, dataset_name, run_number, 'plus',
+        return self.run_kmeans_auto_param(nb_clusters, src_file, data_without_target, dataset_name, run_number, 'plus',
                                    run_info, nb_iterations)
 
     def run_kmeans_random(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                           nb_iterations=None):
-        self.run_kmeans_auto_param(nb_clusters, src_file, data_without_target, dataset_name, run_number, 'sample',
+        return self.run_kmeans_auto_param(nb_clusters, src_file, data_without_target, dataset_name, run_number, 'sample',
                                    run_info, nb_iterations)
 
     def run_hierarchical(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):

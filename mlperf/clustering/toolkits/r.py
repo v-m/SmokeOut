@@ -166,7 +166,7 @@ class RClusterR(R):
                              nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
-        r_script = self._build_kmeanspp_script_clusterer(src_file, output_file, centroids_file, self.seed)
+        r_script = self._build_kmeanspp_script_clusterer(src_file, output_file, centroids_file, nb_iterations, self.seed)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=r_script)
 
