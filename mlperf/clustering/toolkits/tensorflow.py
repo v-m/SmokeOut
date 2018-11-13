@@ -1,4 +1,5 @@
 """Tensorflow clustering"""
+import tensorflow as tf
 from tensorflow.contrib.factorization import KMEANS_PLUS_PLUS_INIT
 
 __author__ = "Vincenzo Musco (http://www.vmusco.com)"
