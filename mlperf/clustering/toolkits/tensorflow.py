@@ -17,10 +17,8 @@ class TensorFlow(clusteringtoolkit.ClusteringToolkit):
         return TENSORFLOW_TOOLKIT
 
     @staticmethod
-    def _train_kpp(input_fn, kmeans, iterations=10):
+    def _train_kpp(input_fn, kmeans, num_iterations=10):
         # train
-        num_iterations = 10
-        previous_centers = None
         for _ in xrange(num_iterations):
             kmeans.train(input_fn)
 
