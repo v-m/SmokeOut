@@ -1,4 +1,5 @@
 """Weka clustering"""
+import os
 
 __author__ = "Vincenzo Musco (http://www.vmusco.com)"
 
@@ -42,10 +43,13 @@ class Weka(clusteringtoolkit.ClusteringToolkit):
         if mode is not None:
             weka_rest.append("mode={}".format(mode))
 
-        command_parts = [JAVA_EXE, "-classpath", JAVA_CLASSPATH, "WekaRun", src_file, output_file, centroids_file]
+        command_parts = [JAVA_EXE, "-classpath", JAVA_CLASSPATH, "WekaRun", os.path.abspath(src_file), output_file,
+                         os.path.abspath(centroids_file)]
 
         if len(weka_rest) > 0:
             command_parts.append(";".join(weka_rest))
+
+        # print("' '".join(command_parts))
 
         subprocess.call(command_parts)
         return output_file, {"centroids": centroids_file}

@@ -113,12 +113,12 @@ class SklearnVanilla(SklearnCustomTolerance):
 
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
-        return super().run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number,
+        return super().run_kmeans_plus_plus(nb_clusters, src_file, data_without_target, dataset_name, run_number,
                                             nb_iterations)
 
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
-        return super().run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
+        return super().run_kmeans(nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                                   initial_clusters, run_number, run_info, nb_iterations)
 
     def run_gaussian(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None):

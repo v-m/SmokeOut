@@ -18,6 +18,7 @@ import java.util.zip.GZIPInputStream;
 
 public class WekaRun {
     public static void main(String[] args) throws Exception {
+        //System.out.println(String.join("\n", args));
         CSVLoader loader = new CSVLoader();
         String mode = "kpp";
 
@@ -31,7 +32,7 @@ public class WekaRun {
 
 
         if(args.length > 3){
-            String[] argsParts = args[4].split(";");
+            String[] argsParts = args[3].split(";");
             for(String part : argsParts) {
                 String[] subparts = part.split("=");
 
