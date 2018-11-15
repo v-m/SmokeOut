@@ -1,4 +1,7 @@
 """R clustering"""
+import re
+import subprocess
+import sys
 
 __author__ = "Vincenzo Musco (http://www.vmusco.com)"
 
@@ -88,6 +91,15 @@ class R(clusteringtoolkit.ClusteringToolkit):
 
         return ret
 
+    @staticmethod
+    def _package_version(package_name):
+        script_parts = ['''packageVersion("{}");'''.format(package_name)]
+
+        p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        out, err = p.communicate(input="\n".join(script_parts).encode())
+        groups = re.fullmatch(".*?\[1\] ‘([^’]+)’.*?", out.decode(), flags=re.DOTALL)
+        return groups.group(1)
+
     def run_kmeans(self, nb_clusters, src_file, data_without_target, dataset_name, initial_clusters_file,
                    initial_clusters, run_number, run_info=None, nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
@@ -161,6 +173,8 @@ class RClusterR(R):
 
         return ret
 
+    def package_version(self):
+        return R._package_version("ClusterR")
 
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
@@ -207,12 +221,19 @@ class RFlexclust(R):
 
         return ret
 
+    def package_version(self):
+        return R._package_version("flexclust")
+
     def run_kmeans_plus_plus(self, nb_clusters, src_file, data_without_target, dataset_name, run_number, run_info=None,
                              nb_iterations=None):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         r_script = self._build_kmeanspp_script_flexclust(src_file, output_file, centroids_file, self.seed)
         p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+
+        if self.debug:
+            print(r_script)
+
         p.communicate(input=r_script)
 
         dta = pandas.read_csv(centroids_file)
