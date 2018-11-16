@@ -1,12 +1,9 @@
 """R clustering"""
-import re
-import subprocess
-import sys
-
 __author__ = "Vincenzo Musco (http://www.vmusco.com)"
 
+import re
+import subprocess
 from os import path
-from subprocess import Popen, PIPE
 
 from mlperf.clustering import clusteringtoolkit
 from mlperf.tools.config import R_BIN
@@ -21,6 +18,22 @@ class R(clusteringtoolkit.ClusteringToolkit):
     def check_toolkit_requirements(self):
         if not path.exists(R_BIN):
             raise FileNotFoundError("Unable to locate R binary")
+
+    @staticmethod
+    def install_package(package_name):
+        script_parts = '''install.packages("{}");'''.format(package_name)
+        p = subprocess.Popen([R_BIN, '--vanilla'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        p.communicate(input=script_parts.encode())
+        return p.returncode
+
+    @staticmethod
+    def uninstall_package(package_name):
+        script_parts = '''remove.packages("{}");'''.format(package_name)
+        p = subprocess.Popen([R_BIN, '--vanilla'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        p.communicate(input=script_parts.encode())
+        return p.returncode
 
     def _build_kmeans_script(self, src_file, dst_clusters, dst_centroids, init_clusters=None, max_iter=None, seed=None):
         script_parts = []
@@ -95,7 +108,8 @@ class R(clusteringtoolkit.ClusteringToolkit):
     def _package_version(package_name):
         script_parts = ['''packageVersion("{}");'''.format(package_name)]
 
-        p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = subprocess.Popen([R_BIN, '--vanilla'], stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
         out, err = p.communicate(input="\n".join(script_parts).encode())
         groups = re.fullmatch(".*?\[1\] ‘([^’]+)’.*?", out.decode(), flags=re.DOTALL)
         return groups.group(1)
@@ -106,7 +120,8 @@ class R(clusteringtoolkit.ClusteringToolkit):
 
         r_script = self._build_kmeans_script(src_file, output_file, centroids_file, initial_clusters_file,
                                              nb_iterations, self.seed)
-        p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = subprocess.Popen([R_BIN, '--vanilla'], stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
         p.communicate(input=r_script)
 
         dta = pandas.read_csv(centroids_file)
@@ -119,7 +134,8 @@ class R(clusteringtoolkit.ClusteringToolkit):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         r_script = self._build_kmeans_script(src_file, output_file, centroids_file, None, nb_iterations, self.seed)
-        p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = subprocess.Popen([R_BIN, '--vanilla'], stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
         p.communicate(input=r_script)
 
         dta = pandas.read_csv(centroids_file)
@@ -131,7 +147,8 @@ class R(clusteringtoolkit.ClusteringToolkit):
         output_file, = self._prepare_files(dataset_name, run_info, False)
 
         r_script = self._build_hierarchical(src_file, output_file, self.seed)
-        p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = subprocess.Popen([R_BIN, '--vanilla'], stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
         p.communicate(input=r_script)
 
         return output_file, {}
@@ -181,7 +198,8 @@ class RClusterR(R):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         r_script = self._build_kmeanspp_script_clusterer(src_file, output_file, centroids_file, nb_iterations, self.seed)
-        p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = subprocess.Popen([R_BIN, '--vanilla'], stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
         p.communicate(input=r_script)
 
         dta = pandas.read_csv(centroids_file)
@@ -229,7 +247,8 @@ class RFlexclust(R):
         output_file, centroids_file = self._prepare_files(dataset_name, run_info, True)
 
         r_script = self._build_kmeanspp_script_flexclust(src_file, output_file, centroids_file, self.seed)
-        p = Popen([R_BIN, '--vanilla'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = subprocess.Popen([R_BIN, '--vanilla'], stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
 
         if self.debug:
             print(r_script)
